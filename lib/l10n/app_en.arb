@@ -1,0 +1,111 @@
+{
+  "@@locale": "en",
+  "appName": "OWRTPC",
+  "profilesTitle": "Profiles",
+  "settingsTitle": "Settings",
+  "profilesNavigationLabel": "Profiles",
+  "settingsNavigationLabel": "Settings",
+  "connectedTo": "Connected to {router}",
+  "@connectedTo": {
+    "placeholders": { "router": { "type": "String" } }
+  },
+  "refreshTooltip": "Refresh profiles",
+  "addProfileTooltip": "Add profile",
+  "allowed": "Allowed",
+  "manuallyBlocked": "Manually blocked",
+  "bedtime": "Bedtime",
+  "timeUsed": "Time used",
+  "disabled": "Disabled",
+  "usedOfAllowance": "{used} of {allowance} used",
+  "@usedOfAllowance": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "allowance": { "type": "String" }
+    }
+  },
+  "remaining": "{time} remaining",
+  "@remaining": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "unlimitedToday": "Unlimited today",
+  "deviceCount": "{count, plural, =1{1 device} other{{count} devices}}",
+  "@deviceCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "block": "Block",
+  "unblock": "Unblock",
+  "addTime": "Add time",
+  "fixtureNotice": "Preview profiles — live profile loading comes next",
+  "welcomeTitle": "Your router, directly",
+  "welcomeBody": "OWRTPC connects over your local network. No cloud account or remote relay is used.",
+  "httpsNotice": "Only secure HTTPS connections are accepted.",
+  "routerAddressField": "Router address",
+  "routerAddressHint": "openwrt.lan or 192.168.1.1",
+  "usernameField": "Username",
+  "passwordField": "Password",
+  "connectAction": "Connect securely",
+  "connectingAction": "Checking router…",
+  "requiredField": "This field is required",
+  "connectionInvalidAddress": "Enter a valid router address without a path or query.",
+  "connectionInsecureTransport": "HTTP is not allowed. Configure HTTPS on the router first.",
+  "connectionRouterUnreachable": "The router could not be reached on this local network.",
+  "connectionTimeout": "The router did not respond in time.",
+  "connectionTlsUntrusted": "The router certificate is not trusted. Certificate pairing is not yet enabled in this build.",
+  "connectionInvalidCredentials": "The username or password is incorrect.",
+  "connectionPermissionDenied": "This account does not have OWRTPC read access.",
+  "connectionApiMissing": "The router does not provide the OWRTPC mobile API.",
+  "connectionApiIncompatible": "This router uses an incompatible OWRTPC mobile API version.",
+  "connectionMalformedResponse": "The router returned an invalid response.",
+  "connectionBackendFailure": "OWRTPC could not complete the connection check.",
+  "preferencesSection": "Preferences",
+  "routerSection": "Router",
+  "appSection": "App",
+  "appearance": "Appearance",
+  "language": "Language",
+  "appearanceSystem": "Automatic",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark",
+  "languageSystem": "System · English",
+  "languageEnglish": "English",
+  "languageItalian": "Italiano",
+  "cycleAppearanceA11y": "Appearance: {current}. Activate for {next}.",
+  "@cycleAppearanceA11y": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "next": { "type": "String" }
+    }
+  },
+  "cycleLanguageA11y": "Language: {current}. Activate for {next}.",
+  "@cycleLanguageA11y": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "next": { "type": "String" }
+    }
+  },
+  "routerAddress": "Router address",
+  "notConnected": "Not connected",
+  "signedInAccount": "Signed-in account",
+  "readWriteAccess": "Read and write access",
+  "readOnlyAccess": "Read-only access",
+  "connectionSecurity": "Connection security",
+  "httpsRequired": "HTTPS required",
+  "mobileContract": "Mobile contract",
+  "contractVersion": "Waiting for router · API 1.0",
+  "contractVersionValue": "API {major}.{minor} · {backend}",
+  "@contractVersionValue": {
+    "placeholders": {
+      "major": { "type": "int" },
+      "minor": { "type": "int" },
+      "backend": { "type": "String" }
+    }
+  },
+  "about": "About OWRTPC",
+  "privacySummary": "Local only · no cloud or analytics",
+  "signOut": "Sign out",
+  "familyProfile": "Family",
+  "childrenProfile": "Children",
+  "twoHours": "2h",
+  "oneHourTwenty": "1h 20m",
+  "fortyMinutes": "40m",
+  "thirtyMinutes": "30m"
+}

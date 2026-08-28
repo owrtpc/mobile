@@ -1,0 +1,9 @@
+.dart_tool
+.git
+.idea
+.metadata
+.vscode
+build
+coverage
+ios/Pods
+**/.DS_Store

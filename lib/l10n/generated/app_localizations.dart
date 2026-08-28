@@ -1,0 +1,578 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_it.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'generated/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('it'),
+  ];
+
+  /// No description provided for @appName.
+  ///
+  /// In en, this message translates to:
+  /// **'OWRTPC'**
+  String get appName;
+
+  /// No description provided for @profilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get profilesTitle;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @profilesNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get profilesNavigationLabel;
+
+  /// No description provided for @settingsNavigationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsNavigationLabel;
+
+  /// No description provided for @connectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {router}'**
+  String connectedTo(String router);
+
+  /// No description provided for @refreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh profiles'**
+  String get refreshTooltip;
+
+  /// No description provided for @addProfileTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add profile'**
+  String get addProfileTooltip;
+
+  /// No description provided for @allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get allowed;
+
+  /// No description provided for @manuallyBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually blocked'**
+  String get manuallyBlocked;
+
+  /// No description provided for @bedtime.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime'**
+  String get bedtime;
+
+  /// No description provided for @timeUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Time used'**
+  String get timeUsed;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// No description provided for @usedOfAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {allowance} used'**
+  String usedOfAllowance(String used, String allowance);
+
+  /// No description provided for @remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} remaining'**
+  String remaining(String time);
+
+  /// No description provided for @unlimitedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited today'**
+  String get unlimitedToday;
+
+  /// No description provided for @deviceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 device} other{{count} devices}}'**
+  String deviceCount(int count);
+
+  /// No description provided for @block.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get block;
+
+  /// No description provided for @unblock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get unblock;
+
+  /// No description provided for @addTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time'**
+  String get addTime;
+
+  /// No description provided for @fixtureNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview profiles — live profile loading comes next'**
+  String get fixtureNotice;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your router, directly'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'OWRTPC connects over your local network. No cloud account or remote relay is used.'**
+  String get welcomeBody;
+
+  /// No description provided for @httpsNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Only secure HTTPS connections are accepted.'**
+  String get httpsNotice;
+
+  /// No description provided for @routerAddressField.
+  ///
+  /// In en, this message translates to:
+  /// **'Router address'**
+  String get routerAddressField;
+
+  /// No description provided for @routerAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'openwrt.lan or 192.168.1.1'**
+  String get routerAddressHint;
+
+  /// No description provided for @usernameField.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameField;
+
+  /// No description provided for @passwordField.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordField;
+
+  /// No description provided for @connectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect securely'**
+  String get connectAction;
+
+  /// No description provided for @connectingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking router…'**
+  String get connectingAction;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredField;
+
+  /// No description provided for @connectionInvalidAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid router address without a path or query.'**
+  String get connectionInvalidAddress;
+
+  /// No description provided for @connectionInsecureTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP is not allowed. Configure HTTPS on the router first.'**
+  String get connectionInsecureTransport;
+
+  /// No description provided for @connectionRouterUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The router could not be reached on this local network.'**
+  String get connectionRouterUnreachable;
+
+  /// No description provided for @connectionTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The router did not respond in time.'**
+  String get connectionTimeout;
+
+  /// No description provided for @connectionTlsUntrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'The router certificate is not trusted. Certificate pairing is not yet enabled in this build.'**
+  String get connectionTlsUntrusted;
+
+  /// No description provided for @connectionInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'The username or password is incorrect.'**
+  String get connectionInvalidCredentials;
+
+  /// No description provided for @connectionPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'This account does not have OWRTPC read access.'**
+  String get connectionPermissionDenied;
+
+  /// No description provided for @connectionApiMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The router does not provide the OWRTPC mobile API.'**
+  String get connectionApiMissing;
+
+  /// No description provided for @connectionApiIncompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'This router uses an incompatible OWRTPC mobile API version.'**
+  String get connectionApiIncompatible;
+
+  /// No description provided for @connectionMalformedResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The router returned an invalid response.'**
+  String get connectionMalformedResponse;
+
+  /// No description provided for @connectionBackendFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'OWRTPC could not complete the connection check.'**
+  String get connectionBackendFailure;
+
+  /// No description provided for @preferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get preferencesSection;
+
+  /// No description provided for @routerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Router'**
+  String get routerSection;
+
+  /// No description provided for @appSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get appSection;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @appearanceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get appearanceSystem;
+
+  /// No description provided for @appearanceLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get appearanceLight;
+
+  /// No description provided for @appearanceDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get appearanceDark;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System · English'**
+  String get languageSystem;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageItalian.
+  ///
+  /// In en, this message translates to:
+  /// **'Italiano'**
+  String get languageItalian;
+
+  /// No description provided for @cycleAppearanceA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance: {current}. Activate for {next}.'**
+  String cycleAppearanceA11y(String current, String next);
+
+  /// No description provided for @cycleLanguageA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Language: {current}. Activate for {next}.'**
+  String cycleLanguageA11y(String current, String next);
+
+  /// No description provided for @routerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Router address'**
+  String get routerAddress;
+
+  /// No description provided for @notConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get notConnected;
+
+  /// No description provided for @signedInAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed-in account'**
+  String get signedInAccount;
+
+  /// No description provided for @readWriteAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and write access'**
+  String get readWriteAccess;
+
+  /// No description provided for @readOnlyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only access'**
+  String get readOnlyAccess;
+
+  /// No description provided for @connectionSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection security'**
+  String get connectionSecurity;
+
+  /// No description provided for @httpsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTPS required'**
+  String get httpsRequired;
+
+  /// No description provided for @mobileContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile contract'**
+  String get mobileContract;
+
+  /// No description provided for @contractVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for router · API 1.0'**
+  String get contractVersion;
+
+  /// No description provided for @contractVersionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'API {major}.{minor} · {backend}'**
+  String contractVersionValue(int major, int minor, String backend);
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About OWRTPC'**
+  String get about;
+
+  /// No description provided for @privacySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Local only · no cloud or analytics'**
+  String get privacySummary;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
+
+  /// No description provided for @familyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get familyProfile;
+
+  /// No description provided for @childrenProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get childrenProfile;
+
+  /// No description provided for @twoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'2h'**
+  String get twoHours;
+
+  /// No description provided for @oneHourTwenty.
+  ///
+  /// In en, this message translates to:
+  /// **'1h 20m'**
+  String get oneHourTwenty;
+
+  /// No description provided for @fortyMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'40m'**
+  String get fortyMinutes;
+
+  /// No description provided for @thirtyMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'30m'**
+  String get thirtyMinutes;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'it'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'it':
+      return AppLocalizationsIt();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}
