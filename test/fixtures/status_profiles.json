@@ -1,0 +1,18 @@
+{
+  "date": "2026-08-28",
+  "profiles": [
+    {
+      "section": "children",
+      "name": "Children",
+      "used_seconds": 4800,
+      "limit_seconds": 7200,
+      "remaining_seconds": 2400,
+      "reason": "quota",
+      "manual_blocked": false,
+      "schedule": "weekday",
+      "bonus_seconds": 0,
+      "all_day": false,
+      "blocked": true
+    }
+  ]
+}

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../security/certificate_trust.dart';
+
 enum JsonRpcTransportFailureKind {
   network,
   tls,
@@ -24,10 +26,14 @@ abstract interface class JsonRpcTransport {
 class HttpJsonRpcTransport implements JsonRpcTransport {
   HttpJsonRpcTransport({
     HttpClient? client,
+    CertificateTrust? certificateTrust,
     this.timeout = const Duration(seconds: 15),
     this.maximumResponseBytes = 1024 * 1024,
   }) : _client = client ?? HttpClient() {
     _client.connectionTimeout = timeout;
+    if (certificateTrust != null) {
+      _client.badCertificateCallback = certificateTrust.allows;
+    }
   }
 
   final HttpClient _client;

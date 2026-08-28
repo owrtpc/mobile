@@ -1,22 +1,30 @@
+import '../../connection/domain/connected_router.dart';
 import '../domain/profile_summary.dart';
 
-class FixtureProfilesRepository {
+abstract interface class ProfilesRepository {
+  Future<List<ProfileSummary>> load(ConnectedRouter router);
+}
+
+class FixtureProfilesRepository implements ProfilesRepository {
   const FixtureProfilesRepository();
 
-  List<ProfileSummary> load() => const [
+  @override
+  Future<List<ProfileSummary>> load(ConnectedRouter router) async => const [
     ProfileSummary(
-      nameKey: 'family',
+      section: 'family',
+      name: 'Family',
       state: ProfileState.allowed,
-      usedMinutes: 80,
-      allowanceMinutes: 120,
+      usedSeconds: 4800,
+      allowanceSeconds: 7200,
       deviceCount: 3,
       enabled: true,
     ),
     ProfileSummary(
-      nameKey: 'children',
+      section: 'children',
+      name: 'Children',
       state: ProfileState.manuallyBlocked,
-      usedMinutes: 30,
-      allowanceMinutes: 120,
+      usedSeconds: 1800,
+      allowanceSeconds: 7200,
       deviceCount: 2,
       enabled: true,
     ),

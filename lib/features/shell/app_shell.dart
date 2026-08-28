@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_preferences.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../connection/domain/connected_router.dart';
+import '../profiles/data/fixture_profiles_repository.dart';
 import '../profiles/presentation/profiles_screen.dart';
 import '../settings/presentation/settings_screen.dart';
 
@@ -10,12 +11,14 @@ class AppShell extends StatefulWidget {
   const AppShell({
     required this.preferences,
     required this.router,
+    required this.profilesRepository,
     required this.onSignOut,
     super.key,
   });
 
   final AppPreferences preferences;
   final ConnectedRouter router;
+  final ProfilesRepository profilesRepository;
   final Future<void> Function() onSignOut;
 
   @override
@@ -30,8 +33,8 @@ class _AppShellState extends State<AppShell> {
     final strings = AppLocalizations.of(context);
     final screens = [
       ProfilesScreen(
-        routerAddress: widget.router.endpoint.displayAddress,
-        canWrite: widget.router.canWrite,
+        router: widget.router,
+        repository: widget.profilesRepository,
       ),
       SettingsScreen(
         preferences: widget.preferences,

@@ -84,8 +84,36 @@ class AppLocalizationsIt extends AppLocalizations {
   String get addTime => 'Aggiungi tempo';
 
   @override
-  String get fixtureNotice =>
-      'Profili di anteprima — il caricamento dei profili live è il prossimo passo';
+  String get fixtureNotice => 'Modalità anteprima — dati profilo dimostrativi';
+
+  @override
+  String get loadingProfiles => 'Caricamento profili…';
+
+  @override
+  String get loadProfilesError =>
+      'Non è stato possibile caricare i profili dal router.';
+
+  @override
+  String get retryAction => 'Riprova';
+
+  @override
+  String get noProfiles =>
+      'Su questo router non è configurato alcun profilo di controllo parentale.';
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String get welcomeTitle => 'Il tuo router, direttamente';
@@ -135,7 +163,33 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get connectionTlsUntrusted =>
-      'Il certificato del router non è attendibile. L’abbinamento dei certificati non è ancora attivo in questa build.';
+      'Il certificato del router non è ancora considerato attendibile.';
+
+  @override
+  String get certificatePairingTitle => 'Verifica il certificato del router';
+
+  @override
+  String get certificatePairingBody =>
+      'Non è stata inviata alcuna credenziale. Prima di considerarlo attendibile, confronta questa impronta SHA-256 con il certificato mostrato dall’amministrazione del router.';
+
+  @override
+  String get certificateFingerprint => 'Impronta SHA-256';
+
+  @override
+  String certificateValidUntil(String date) {
+    return 'Valido fino al $date';
+  }
+
+  @override
+  String get certificateCompareConfirmation =>
+      'Ho confrontato l’impronta con il mio router';
+
+  @override
+  String get certificateTrustAndConnect => 'Considera attendibile e connetti';
+
+  @override
+  String get certificateExpired =>
+      'Questo certificato è scaduto o non è ancora valido e non può essere abbinato.';
 
   @override
   String get connectionInvalidCredentials =>

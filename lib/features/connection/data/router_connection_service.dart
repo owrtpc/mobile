@@ -1,14 +1,46 @@
 import '../../../core/network/json_rpc_client.dart';
 import '../../../core/network/json_rpc_transport.dart';
+import '../../../core/security/certificate_trust.dart';
+import '../../../core/security/router_certificate_inspector.dart';
 import '../domain/connected_router.dart';
 import '../domain/connection_failure.dart';
 import '../domain/router_capabilities.dart';
 import '../domain/router_endpoint.dart';
 
 class RouterConnectionService {
-  const RouterConnectionService({required this.transport});
+  const RouterConnectionService({
+    required this.transport,
+    this.certificateTrust,
+    this.certificateInspector = const RouterCertificateInspector(),
+  });
 
   final JsonRpcTransport transport;
+  final CertificateTrust? certificateTrust;
+  final RouterCertificateInspector certificateInspector;
+
+  Future<RouterCertificate?> inspectCertificate(String address) async {
+    final RouterEndpoint endpoint;
+    try {
+      endpoint = RouterEndpoint.parse(address);
+    } on InsecureRouterEndpointException {
+      throw const ConnectionFailure(ConnectionFailureKind.insecureTransport);
+    } on FormatException {
+      throw const ConnectionFailure(ConnectionFailureKind.invalidAddress);
+    }
+    try {
+      return await certificateInspector.inspect(endpoint);
+    } on JsonRpcTransportException catch (error) {
+      throw ConnectionFailure(_transportFailure(error.kind));
+    }
+  }
+
+  Future<void> trustCertificate(RouterCertificate certificate) async {
+    final trust = certificateTrust;
+    if (trust == null) {
+      throw StateError('Certificate trust is not configured');
+    }
+    await trust.trust(certificate);
+  }
 
   Future<ConnectedRouter> connect({
     required String address,
@@ -105,16 +137,7 @@ class RouterConnectionService {
       throw const ConnectionFailure(ConnectionFailureKind.backendFailure);
     } on JsonRpcTransportException catch (error) {
       if (sessionToken != null) await _bestEffortSignOut(client, sessionToken);
-      throw ConnectionFailure(switch (error.kind) {
-        JsonRpcTransportFailureKind.network =>
-          ConnectionFailureKind.routerUnreachable,
-        JsonRpcTransportFailureKind.tls => ConnectionFailureKind.tlsUntrusted,
-        JsonRpcTransportFailureKind.timeout => ConnectionFailureKind.timeout,
-        JsonRpcTransportFailureKind.httpStatus =>
-          ConnectionFailureKind.routerUnreachable,
-        JsonRpcTransportFailureKind.malformedResponse =>
-          ConnectionFailureKind.malformedResponse,
-      });
+      throw ConnectionFailure(_transportFailure(error.kind));
     } on JsonRpcProtocolException {
       if (sessionToken != null) await _bestEffortSignOut(client, sessionToken);
       throw const ConnectionFailure(ConnectionFailureKind.malformedResponse);
@@ -123,6 +146,19 @@ class RouterConnectionService {
       throw const ConnectionFailure(ConnectionFailureKind.malformedResponse);
     }
   }
+
+  static ConnectionFailureKind _transportFailure(
+    JsonRpcTransportFailureKind kind,
+  ) => switch (kind) {
+    JsonRpcTransportFailureKind.network =>
+      ConnectionFailureKind.routerUnreachable,
+    JsonRpcTransportFailureKind.tls => ConnectionFailureKind.tlsUntrusted,
+    JsonRpcTransportFailureKind.timeout => ConnectionFailureKind.timeout,
+    JsonRpcTransportFailureKind.httpStatus =>
+      ConnectionFailureKind.routerUnreachable,
+    JsonRpcTransportFailureKind.malformedResponse =>
+      ConnectionFailureKind.malformedResponse,
+  };
 
   Future<void> signOut(ConnectedRouter router) async {
     if (router.isPreview) return;

@@ -35,7 +35,26 @@
   "block": "Block",
   "unblock": "Unblock",
   "addTime": "Add time",
-  "fixtureNotice": "Preview profiles — live profile loading comes next",
+  "fixtureNotice": "Preview mode — sample profile data",
+  "loadingProfiles": "Loading profiles…",
+  "loadProfilesError": "Profiles could not be loaded from the router.",
+  "retryAction": "Try again",
+  "noProfiles": "No parental-control profiles are configured on this router.",
+  "durationHoursMinutes": "{hours}h {minutes}m",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "durationHours": "{hours}h",
+  "@durationHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "durationMinutes": "{minutes}m",
+  "@durationMinutes": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
   "welcomeTitle": "Your router, directly",
   "welcomeBody": "OWRTPC connects over your local network. No cloud account or remote relay is used.",
   "httpsNotice": "Only secure HTTPS connections are accepted.",
@@ -50,7 +69,17 @@
   "connectionInsecureTransport": "HTTP is not allowed. Configure HTTPS on the router first.",
   "connectionRouterUnreachable": "The router could not be reached on this local network.",
   "connectionTimeout": "The router did not respond in time.",
-  "connectionTlsUntrusted": "The router certificate is not trusted. Certificate pairing is not yet enabled in this build.",
+  "connectionTlsUntrusted": "The router certificate is not trusted yet.",
+  "certificatePairingTitle": "Verify router certificate",
+  "certificatePairingBody": "No credentials were sent. Compare this SHA-256 fingerprint with the certificate shown by your router administration before trusting it.",
+  "certificateFingerprint": "SHA-256 fingerprint",
+  "certificateValidUntil": "Valid until {date}",
+  "@certificateValidUntil": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "certificateCompareConfirmation": "I compared the fingerprint with my router",
+  "certificateTrustAndConnect": "Trust and connect",
+  "certificateExpired": "This certificate is expired or not yet valid and cannot be paired.",
   "connectionInvalidCredentials": "The username or password is incorrect.",
   "connectionPermissionDenied": "This account does not have OWRTPC read access.",
   "connectionApiMissing": "The router does not provide the OWRTPC mobile API.",

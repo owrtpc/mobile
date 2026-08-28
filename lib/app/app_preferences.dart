@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../core/platform/local_preferences_store.dart';
 
 enum AppearancePreference { system, light, dark }
 
@@ -20,7 +21,7 @@ class AppPreferences extends ChangeNotifier {
   final Future<void> Function(String key, String value)? persistPreference;
 
   static Future<AppPreferences> load() async {
-    final storage = SharedPreferencesAsync();
+    const storage = LocalPreferencesStore();
     final appearanceValue = await storage.getString(_appearanceKey);
     final languageValue = await storage.getString(_languageKey);
     return AppPreferences(

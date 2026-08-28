@@ -27,6 +27,8 @@ void main() {
       _fixture('access_read.json'),
       _fixture('access_read_only.json'),
       _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
     ]);
     final preferences = AppPreferences(language: LanguagePreference.english);
     await tester.pumpWidget(
@@ -50,7 +52,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Connected to openwrt.lan'), findsOneWidget);
-    expect(find.text('Family'), findsOneWidget);
+    expect(find.text('Children'), findsOneWidget);
+    expect(find.text('Time used'), findsOneWidget);
     expect(find.text('Block'), findsNothing);
     expect(find.byType(Switch), findsNothing);
   });
@@ -63,14 +66,12 @@ void main() {
         initialRouter: ConnectedRouter.preview(),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Profiles'), findsWidgets);
     expect(find.text('Family'), findsOneWidget);
     expect(find.text('Children'), findsOneWidget);
-    expect(
-      find.text('Preview profiles — live profile loading comes next'),
-      findsOne,
-    );
+    expect(find.text('Preview mode — sample profile data'), findsOne);
   });
 
   testWidgets('uses one cyclic appearance control', (tester) async {
@@ -143,6 +144,12 @@ Map<String, Object?> _fixture(String name) {
   final decoded = jsonDecode(File('test/fixtures/$name').readAsStringSync());
   return Map<String, Object?>.from(decoded as Map);
 }
+
+Map<String, Object?> _rpcPayload(Map<String, Object?> payload) => {
+  'jsonrpc': '2.0',
+  'id': 1,
+  'result': [0, payload],
+};
 
 class _WidgetFixtureTransport implements JsonRpcTransport {
   _WidgetFixtureTransport(this._responses);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/security/certificate_trust.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../domain/connection_failure.dart';
 import 'connection_controller.dart';
@@ -18,6 +19,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   final _addressController = TextEditingController(text: 'openwrt.lan');
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _certificateCompared = false;
 
   @override
   void dispose() {
@@ -80,6 +82,10 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         keyboardType: TextInputType.url,
                         textInputAction: TextInputAction.next,
                         autocorrect: false,
+                        onChanged: (_) {
+                          _certificateCompared = false;
+                          widget.controller.clearPairing();
+                        },
                         decoration: InputDecoration(
                           labelText: strings.routerAddressField,
                           hintText: strings.routerAddressHint,
@@ -120,6 +126,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         const SizedBox(height: 16),
                         _ConnectionError(
                           message: _failureMessage(strings, failure),
+                        ),
+                      ],
+                      if (widget.controller.pairingCertificate
+                          case final certificate?) ...[
+                        const SizedBox(height: 16),
+                        _CertificatePairingCard(
+                          certificate: certificate,
+                          compared: _certificateCompared,
+                          onCompared: (value) => setState(() {
+                            _certificateCompared = value;
+                          }),
+                          onTrust: () => _trustAndConnect(certificate),
                         ),
                       ],
                       const SizedBox(height: 20),
@@ -169,6 +187,16 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     );
   }
 
+  Future<void> _trustAndConnect(RouterCertificate certificate) async {
+    if (!_certificateCompared || !certificate.isCurrentlyValid) return;
+    await widget.controller.trustCertificate(certificate);
+    if (!mounted) return;
+    setState(() {
+      _certificateCompared = false;
+    });
+    _submit();
+  }
+
   String _failureMessage(
     AppLocalizations strings,
     ConnectionFailureKind failure,
@@ -190,6 +218,99 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       strings.connectionMalformedResponse,
     ConnectionFailureKind.backendFailure => strings.connectionBackendFailure,
   };
+}
+
+class _CertificatePairingCard extends StatelessWidget {
+  const _CertificatePairingCard({
+    required this.certificate,
+    required this.compared,
+    required this.onCompared,
+    required this.onTrust,
+  });
+
+  final RouterCertificate certificate;
+  final bool compared;
+  final ValueChanged<bool> onCompared;
+  final VoidCallback onTrust;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final validUntil = certificate.validUntil
+        .toLocal()
+        .toIso8601String()
+        .split('T')
+        .first;
+    return Card(
+      color: scheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.fingerprint_rounded, color: scheme.tertiary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    strings.certificatePairingTitle,
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(strings.certificatePairingBody),
+            const SizedBox(height: 14),
+            Text(
+              strings.certificateFingerprint,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 6),
+            SelectableText(
+              certificate.formattedFingerprint,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(strings.certificateValidUntil(validUntil)),
+            if (!certificate.isCurrentlyValid) ...[
+              const SizedBox(height: 8),
+              Text(
+                strings.certificateExpired,
+                style: TextStyle(
+                  color: scheme.error,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: compared,
+              onChanged: certificate.isCurrentlyValid
+                  ? (value) => onCompared(value ?? false)
+                  : null,
+              title: Text(strings.certificateCompareConfirmation),
+            ),
+            FilledButton.icon(
+              key: const Key('trust-certificate-action'),
+              onPressed: compared && certificate.isCurrentlyValid
+                  ? onTrust
+                  : null,
+              icon: const Icon(Icons.verified_user_rounded),
+              label: Text(strings.certificateTrustAndConnect),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SecurityNotice extends StatelessWidget {

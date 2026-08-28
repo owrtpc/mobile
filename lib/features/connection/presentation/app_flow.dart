@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../app/app_preferences.dart';
 import '../../shell/app_shell.dart';
+import '../../profiles/data/fixture_profiles_repository.dart';
+import '../../profiles/data/router_profiles_repository.dart';
 import '../data/router_connection_service.dart';
 import '../domain/connected_router.dart';
 import 'connection_controller.dart';
@@ -50,6 +52,9 @@ class _AppFlowState extends State<AppFlow> {
         return AppShell(
           preferences: widget.preferences,
           router: router,
+          profilesRepository: router.isPreview
+              ? const FixtureProfilesRepository()
+              : RouterProfilesRepository(transport: widget.service.transport),
           onSignOut: _controller.signOut,
         );
       }

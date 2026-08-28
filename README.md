@@ -23,10 +23,17 @@ Docker Desktop on Apple Silicon runs the official Linux x64 Flutter SDK through
 emulation. The named `owrtpc-mobile-pub-cache` volume preserves downloaded Dart
 packages without writing a global SDK or package cache onto the Mac.
 
-Android tooling will be added as a separate pinned Docker image layer. iOS
-project files can be generated and most shared Dart code can be tested in the
-container, but compiling, signing and running the iOS target still requires
-macOS and Xcode.
+Android tooling will be added as a separate pinned Docker image layer. Shared
+Dart code is generated and tested in the container. Compiling, signing and
+running the iOS target requires macOS, Xcode, the matching iOS platform and an
+Apple Development team. A temporary verified macOS Flutter SDK can be used
+without adding Flutter to the host `PATH`:
+
+```sh
+./tool/ios.sh doctor -v
+./tool/ios.sh build ios --debug --no-codesign
+./tool/ios.sh devices
+```
 
 The Flutter image uses the official 3.47.2 Linux archive and verifies its
 published SHA-256 before extraction. CI builds the same image and rejects
@@ -37,14 +44,15 @@ test failures.
 
 The app accepts router hosts only over HTTPS, calls the ubus JSON-RPC bridge at
 `/ubus`, performs `session.login`, checks read and quick-action ACLs, validates
-`owrtpc.capabilities` V1 and keeps the returned session only in memory. Logout
-best-effort destroys the router session. Read-only accounts do not see write
-controls.
+`owrtpc.capabilities` V1 and keeps the returned session only in memory. It then
+combines live `owrtpc.status` and committed `uci get owrtpc` data into the
+profile list. Logout best-effort destroys the router session. Profile writes
+remain hidden in this read-only slice.
 
-TLS currently uses the operating system trust store without bypasses. Explicit
-pairing for the self-signed certificates commonly used by OpenWrt remains an M0
-security task; until it is implemented, such a router is intentionally rejected
-instead of sending credentials over an unverified connection.
+TLS uses the operating system trust store first. An unknown self-signed
+certificate is inspected without sending credentials; the app shows its
+SHA-256 fingerprint and pins it for that exact host and port only after explicit
+user comparison. Expired, not-yet-valid and changed certificates remain blocked.
 
 The product and security contract is maintained in the sibling core repository
 at `../core/docs/MOBILE_APP.md`.

@@ -221,8 +221,50 @@ abstract class AppLocalizations {
   /// No description provided for @fixtureNotice.
   ///
   /// In en, this message translates to:
-  /// **'Preview profiles — live profile loading comes next'**
+  /// **'Preview mode — sample profile data'**
   String get fixtureNotice;
+
+  /// No description provided for @loadingProfiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading profiles…'**
+  String get loadingProfiles;
+
+  /// No description provided for @loadProfilesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles could not be loaded from the router.'**
+  String get loadProfilesError;
+
+  /// No description provided for @retryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retryAction;
+
+  /// No description provided for @noProfiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No parental-control profiles are configured on this router.'**
+  String get noProfiles;
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String durationHours(int hours);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String durationMinutes(int minutes);
 
   /// No description provided for @welcomeTitle.
   ///
@@ -311,8 +353,50 @@ abstract class AppLocalizations {
   /// No description provided for @connectionTlsUntrusted.
   ///
   /// In en, this message translates to:
-  /// **'The router certificate is not trusted. Certificate pairing is not yet enabled in this build.'**
+  /// **'The router certificate is not trusted yet.'**
   String get connectionTlsUntrusted;
+
+  /// No description provided for @certificatePairingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify router certificate'**
+  String get certificatePairingTitle;
+
+  /// No description provided for @certificatePairingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No credentials were sent. Compare this SHA-256 fingerprint with the certificate shown by your router administration before trusting it.'**
+  String get certificatePairingBody;
+
+  /// No description provided for @certificateFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'SHA-256 fingerprint'**
+  String get certificateFingerprint;
+
+  /// No description provided for @certificateValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String certificateValidUntil(String date);
+
+  /// No description provided for @certificateCompareConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'I compared the fingerprint with my router'**
+  String get certificateCompareConfirmation;
+
+  /// No description provided for @certificateTrustAndConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust and connect'**
+  String get certificateTrustAndConnect;
+
+  /// No description provided for @certificateExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This certificate is expired or not yet valid and cannot be paired.'**
+  String get certificateExpired;
 
   /// No description provided for @connectionInvalidCredentials.
   ///

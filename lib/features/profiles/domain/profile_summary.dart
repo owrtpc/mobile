@@ -2,26 +2,28 @@ enum ProfileState { allowed, manuallyBlocked, bedtime, timeUsed, disabled }
 
 class ProfileSummary {
   const ProfileSummary({
-    required this.nameKey,
+    required this.section,
+    required this.name,
     required this.state,
-    required this.usedMinutes,
-    required this.allowanceMinutes,
+    required this.usedSeconds,
+    required this.allowanceSeconds,
     required this.deviceCount,
     required this.enabled,
   });
 
-  final String nameKey;
+  final String section;
+  final String name;
   final ProfileState state;
-  final int usedMinutes;
-  final int allowanceMinutes;
+  final int usedSeconds;
+  final int allowanceSeconds;
   final int deviceCount;
   final bool enabled;
 
-  double? get progress => allowanceMinutes == 0
+  double? get progress => allowanceSeconds == 0
       ? null
-      : (usedMinutes / allowanceMinutes).clamp(0, 1);
+      : (usedSeconds / allowanceSeconds).clamp(0, 1);
 
-  int? get remainingMinutes => allowanceMinutes == 0
+  int? get remainingSeconds => allowanceSeconds == 0
       ? null
-      : (allowanceMinutes - usedMinutes).clamp(0, allowanceMinutes);
+      : (allowanceSeconds - usedSeconds).clamp(0, allowanceSeconds);
 }

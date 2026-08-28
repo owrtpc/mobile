@@ -1,23 +1,56 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
 import '../domain/profile_summary.dart';
 
-class ProfilesScreen extends StatelessWidget {
+class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
-    required this.routerAddress,
-    required this.canWrite,
+    required this.router,
+    required this.repository,
+    this.enableWrites = false,
     super.key,
   });
 
-  final String routerAddress;
-  final bool canWrite;
+  final ConnectedRouter router;
+  final ProfilesRepository repository;
+  final bool enableWrites;
+
+  @override
+  State<ProfilesScreen> createState() => _ProfilesScreenState();
+}
+
+class _ProfilesScreenState extends State<ProfilesScreen> {
+  late Future<List<ProfileSummary>> _profiles;
+
+  @override
+  void initState() {
+    super.initState();
+    _profiles = widget.repository.load(widget.router);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfilesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.router.sessionToken != widget.router.sessionToken ||
+        oldWidget.repository.runtimeType != widget.repository.runtimeType) {
+      _profiles = widget.repository.load(widget.router);
+    }
+  }
+
+  Future<void> _reload() async {
+    final profiles = widget.repository.load(widget.router);
+    setState(() {
+      _profiles = profiles;
+    });
+    await profiles;
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    final profiles = const FixtureProfilesRepository().load();
+    final canModify = widget.enableWrites && widget.router.canWrite;
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -25,7 +58,7 @@ class ProfilesScreen extends StatelessWidget {
           children: [
             Text(strings.profilesTitle),
             Text(
-              strings.connectedTo(routerAddress),
+              strings.connectedTo(widget.router.endpoint.displayAddress),
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ],
@@ -33,10 +66,10 @@ class ProfilesScreen extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: strings.refreshTooltip,
-            onPressed: () {},
+            onPressed: _reload,
             icon: const Icon(Icons.refresh_rounded),
           ),
-          if (canWrite)
+          if (canModify)
             IconButton(
               tooltip: strings.addProfileTooltip,
               onPressed: () {},
@@ -44,16 +77,72 @@ class ProfilesScreen extends StatelessWidget {
             ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          _PreviewNotice(label: strings.fixtureNotice),
-          const SizedBox(height: 12),
-          for (final profile in profiles) ...[
-            _ProfileCard(profile: profile, canWrite: canWrite),
-            const SizedBox(height: 12),
-          ],
-        ],
+      body: FutureBuilder<List<ProfileSummary>>(
+        future: _profiles,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 14),
+                  Text(strings.loadingProfiles),
+                ],
+              ),
+            );
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_off_rounded, size: 44),
+                    const SizedBox(height: 12),
+                    Text(
+                      strings.loadProfilesError,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 14),
+                    FilledButton.icon(
+                      onPressed: _reload,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(strings.retryAction),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          final profiles = snapshot.data ?? const [];
+          return RefreshIndicator(
+            onRefresh: _reload,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              children: [
+                if (widget.router.isPreview) ...[
+                  _PreviewNotice(label: strings.fixtureNotice),
+                  const SizedBox(height: 12),
+                ],
+                if (profiles.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 48),
+                    child: Text(
+                      strings.noProfiles,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                for (final profile in profiles) ...[
+                  _ProfileCard(profile: profile, canWrite: canModify),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -92,9 +181,7 @@ class _ProfileCard extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final blocked = profile.state == ProfileState.manuallyBlocked;
-    final profileName = profile.nameKey == 'family'
-        ? strings.familyProfile
-        : strings.childrenProfile;
+    final profileName = profile.name;
     final stateLabel = switch (profile.state) {
       ProfileState.allowed => strings.allowed,
       ProfileState.manuallyBlocked => strings.manuallyBlocked,
@@ -150,10 +237,10 @@ class _ProfileCard extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               strings.usedOfAllowance(
-                profile.usedMinutes == 80
-                    ? strings.oneHourTwenty
-                    : strings.thirtyMinutes,
-                strings.twoHours,
+                _duration(strings, profile.usedSeconds),
+                profile.allowanceSeconds == 0
+                    ? strings.unlimitedToday
+                    : _duration(strings, profile.allowanceSeconds),
               ),
             ),
             if (profile.progress case final progress?) ...[
@@ -169,12 +256,10 @@ class _ProfileCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    profile.remainingMinutes == null
+                    profile.remainingSeconds == null
                         ? strings.unlimitedToday
                         : strings.remaining(
-                            profile.remainingMinutes == 40
-                                ? strings.fortyMinutes
-                                : strings.oneHourTwenty,
+                            _duration(strings, profile.remainingSeconds!),
                           ),
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
@@ -210,5 +295,16 @@ class _ProfileCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _duration(AppLocalizations strings, int seconds) {
+    final totalMinutes = seconds ~/ 60;
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours > 0 && minutes > 0) {
+      return strings.durationHoursMinutes(hours, minutes);
+    }
+    if (hours > 0) return strings.durationHours(hours);
+    return strings.durationMinutes(minutes);
   }
 }

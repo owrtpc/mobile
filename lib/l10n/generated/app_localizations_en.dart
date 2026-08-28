@@ -84,8 +84,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTime => 'Add time';
 
   @override
-  String get fixtureNotice =>
-      'Preview profiles — live profile loading comes next';
+  String get fixtureNotice => 'Preview mode — sample profile data';
+
+  @override
+  String get loadingProfiles => 'Loading profiles…';
+
+  @override
+  String get loadProfilesError =>
+      'Profiles could not be loaded from the router.';
+
+  @override
+  String get retryAction => 'Try again';
+
+  @override
+  String get noProfiles =>
+      'No parental-control profiles are configured on this router.';
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '${minutes}m';
+  }
 
   @override
   String get welcomeTitle => 'Your router, directly';
@@ -135,7 +163,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectionTlsUntrusted =>
-      'The router certificate is not trusted. Certificate pairing is not yet enabled in this build.';
+      'The router certificate is not trusted yet.';
+
+  @override
+  String get certificatePairingTitle => 'Verify router certificate';
+
+  @override
+  String get certificatePairingBody =>
+      'No credentials were sent. Compare this SHA-256 fingerprint with the certificate shown by your router administration before trusting it.';
+
+  @override
+  String get certificateFingerprint => 'SHA-256 fingerprint';
+
+  @override
+  String certificateValidUntil(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String get certificateCompareConfirmation =>
+      'I compared the fingerprint with my router';
+
+  @override
+  String get certificateTrustAndConnect => 'Trust and connect';
+
+  @override
+  String get certificateExpired =>
+      'This certificate is expired or not yet valid and cannot be paired.';
 
   @override
   String get connectionInvalidCredentials =>

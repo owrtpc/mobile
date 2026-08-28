@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/security/certificate_trust.dart';
 import '../data/router_connection_service.dart';
 import '../domain/connected_router.dart';
 import '../domain/connection_failure.dart';
@@ -17,6 +18,7 @@ class ConnectionController extends ChangeNotifier {
   ConnectionPhase phase;
   ConnectedRouter? router;
   ConnectionFailureKind? failure;
+  RouterCertificate? pairingCertificate;
 
   Future<void> connect({
     required String address,
@@ -26,6 +28,7 @@ class ConnectionController extends ChangeNotifier {
     if (phase == ConnectionPhase.connecting) return;
     phase = ConnectionPhase.connecting;
     failure = null;
+    pairingCertificate = null;
     notifyListeners();
     try {
       router = await service.connect(
@@ -38,7 +41,23 @@ class ConnectionController extends ChangeNotifier {
       router = null;
       failure = error.kind;
       phase = ConnectionPhase.failed;
+      if (error.kind == ConnectionFailureKind.tlsUntrusted) {
+        try {
+          pairingCertificate = await service.inspectCertificate(address);
+        } on ConnectionFailure {
+          pairingCertificate = null;
+        }
+      }
     }
+    notifyListeners();
+  }
+
+  Future<void> trustCertificate(RouterCertificate certificate) =>
+      service.trustCertificate(certificate);
+
+  void clearPairing() {
+    if (pairingCertificate == null) return;
+    pairingCertificate = null;
     notifyListeners();
   }
 
@@ -46,6 +65,7 @@ class ConnectionController extends ChangeNotifier {
     final currentRouter = router;
     router = null;
     failure = null;
+    pairingCertificate = null;
     phase = ConnectionPhase.idle;
     notifyListeners();
     if (currentRouter != null) await service.signOut(currentRouter);

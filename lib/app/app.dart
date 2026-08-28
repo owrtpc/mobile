@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/network/json_rpc_transport.dart';
+import '../core/security/certificate_trust.dart';
 import '../features/connection/data/router_connection_service.dart';
 import '../features/connection/domain/connected_router.dart';
 import '../features/connection/presentation/app_flow.dart';
@@ -12,12 +13,14 @@ class OwrtpcApp extends StatefulWidget {
   const OwrtpcApp({
     required this.preferences,
     this.connectionService,
+    this.certificateTrust,
     this.initialRouter,
     super.key,
   });
 
   final AppPreferences preferences;
   final RouterConnectionService? connectionService;
+  final CertificateTrust? certificateTrust;
   final ConnectedRouter? initialRouter;
 
   @override
@@ -35,9 +38,15 @@ class _OwrtpcAppState extends State<OwrtpcApp> {
     if (suppliedService != null) {
       _connectionService = suppliedService;
     } else {
-      final transport = HttpJsonRpcTransport();
+      final certificateTrust = widget.certificateTrust ?? CertificateTrust();
+      final transport = HttpJsonRpcTransport(
+        certificateTrust: certificateTrust,
+      );
       _ownedTransport = transport;
-      _connectionService = RouterConnectionService(transport: transport);
+      _connectionService = RouterConnectionService(
+        transport: transport,
+        certificateTrust: certificateTrust,
+      );
     }
   }
 

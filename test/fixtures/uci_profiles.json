@@ -1,0 +1,21 @@
+{
+  "values": {
+    "main": {
+      ".anonymous": false,
+      ".type": "globals",
+      ".name": "main",
+      "enabled": "1"
+    },
+    "children": {
+      ".anonymous": false,
+      ".type": "profile",
+      ".name": "children",
+      "name": "Children",
+      "enabled": "1",
+      "device": [
+        "AA:BB:CC:DD:EE:FF",
+        "11:22:33:44:55:66"
+      ]
+    }
+  }
+}
