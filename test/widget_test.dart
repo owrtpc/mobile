@@ -9,8 +9,19 @@ import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
+  setUpAll(() {
+    PackageInfo.setMockInitialValues(
+      appName: 'OWRTPC',
+      packageName: 'org.owrtpc.mobile',
+      version: '0.1.0',
+      buildNumber: '1',
+      buildSignature: '',
+    );
+  });
+
   testWidgets('starts from the secure router connection flow', (tester) async {
     final preferences = AppPreferences(language: LanguagePreference.english);
     await tester.pumpWidget(OwrtpcApp(preferences: preferences));
@@ -104,6 +115,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(preferences.themeMode, ThemeMode.light);
     expect(find.text('Light'), findsOneWidget);
+  });
+
+  testWidgets('shows the installed app version in settings', (tester) async {
+    final preferences = AppPreferences(language: LanguagePreference.english);
+    await tester.pumpWidget(
+      OwrtpcApp(
+        preferences: preferences,
+        initialRouter: ConnectedRouter.preview(),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Version'), findsOneWidget);
+    expect(find.text('0.1.0 (1)'), findsOneWidget);
   });
 
   testWidgets('switches immediately between English and Italian', (

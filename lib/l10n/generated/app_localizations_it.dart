@@ -409,6 +409,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get privacySummary => 'Solo locale · nessun cloud o analytics';
 
   @override
+  String get appVersion => 'Versione';
+
+  @override
+  String appVersionValue(String version, String buildNumber) {
+    return '$version ($buildNumber)';
+  }
+
+  @override
   String get signOut => 'Disconnetti';
 
   @override

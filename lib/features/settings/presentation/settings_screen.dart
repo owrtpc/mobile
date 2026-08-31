@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../app/app_preferences.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../connection/domain/connected_router.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     required this.preferences,
     required this.router,
@@ -15,6 +16,19 @@ class SettingsScreen extends StatelessWidget {
   final AppPreferences preferences;
   final ConnectedRouter router;
   final Future<void> Function() onSignOut;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late final Future<PackageInfo> _packageInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    _packageInfo = PackageInfo.fromPlatform();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +46,30 @@ class SettingsScreen extends StatelessWidget {
                   key: const Key('appearance-cycle'),
                   icon: Icons.brightness_auto_rounded,
                   title: strings.appearance,
-                  value: _appearanceLabel(strings, preferences.appearance),
-                  semanticsLabel: strings.cycleAppearanceA11y(
-                    _appearanceLabel(strings, preferences.appearance),
-                    _appearanceLabel(strings, preferences.nextAppearance),
+                  value: _appearanceLabel(
+                    strings,
+                    widget.preferences.appearance,
                   ),
-                  onPressed: preferences.cycleAppearance,
+                  semanticsLabel: strings.cycleAppearanceA11y(
+                    _appearanceLabel(strings, widget.preferences.appearance),
+                    _appearanceLabel(
+                      strings,
+                      widget.preferences.nextAppearance,
+                    ),
+                  ),
+                  onPressed: widget.preferences.cycleAppearance,
                 ),
                 const Divider(height: 1),
                 _CyclePreferenceTile(
                   key: const Key('language-cycle'),
                   icon: Icons.language_rounded,
                   title: strings.language,
-                  value: _languageLabel(strings, preferences.language),
+                  value: _languageLabel(strings, widget.preferences.language),
                   semanticsLabel: strings.cycleLanguageA11y(
-                    _languageLabel(strings, preferences.language),
-                    _languageLabel(strings, preferences.nextLanguage),
+                    _languageLabel(strings, widget.preferences.language),
+                    _languageLabel(strings, widget.preferences.nextLanguage),
                   ),
-                  onPressed: preferences.cycleLanguage,
+                  onPressed: widget.preferences.cycleLanguage,
                 ),
               ],
             ),
@@ -61,15 +81,15 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.router_outlined),
                   title: Text(strings.routerAddress),
-                  subtitle: Text(router.endpoint.displayAddress),
+                  subtitle: Text(widget.router.endpoint.displayAddress),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.account_circle_outlined),
                   title: Text(strings.signedInAccount),
                   subtitle: Text(
-                    '${router.username} · '
-                    '${router.canWrite ? strings.readWriteAccess : strings.readOnlyAccess}',
+                    '${widget.router.username} · '
+                    '${widget.router.canWrite ? strings.readWriteAccess : strings.readOnlyAccess}',
                   ),
                 ),
                 const Divider(height: 1),
@@ -84,9 +104,9 @@ class SettingsScreen extends StatelessWidget {
                   title: Text(strings.mobileContract),
                   subtitle: Text(
                     strings.contractVersionValue(
-                      router.capabilities.major,
-                      router.capabilities.minor,
-                      router.capabilities.backendVersion,
+                      widget.router.capabilities.major,
+                      widget.router.capabilities.minor,
+                      widget.router.capabilities.backendVersion,
                     ),
                   ),
                 ),
@@ -96,16 +116,39 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 16),
           OutlinedButton.icon(
             key: const Key('sign-out-action'),
-            onPressed: onSignOut,
+            onPressed: widget.onSignOut,
             icon: const Icon(Icons.logout_rounded),
             label: Text(strings.signOut),
           ),
           _SectionTitle(strings.appSection),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.info_outline_rounded),
-              title: Text(strings.about),
-              subtitle: Text(strings.privacySummary),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.info_outline_rounded),
+                  title: Text(strings.about),
+                  subtitle: Text(strings.privacySummary),
+                ),
+                const Divider(height: 1),
+                FutureBuilder<PackageInfo>(
+                  future: _packageInfo,
+                  builder: (context, snapshot) {
+                    final packageInfo = snapshot.data;
+                    final value = packageInfo == null
+                        ? '—'
+                        : strings.appVersionValue(
+                            packageInfo.version,
+                            packageInfo.buildNumber,
+                          );
+                    return ListTile(
+                      key: const Key('app-version'),
+                      leading: const Icon(Icons.tag_rounded),
+                      title: Text(strings.appVersion),
+                      subtitle: Text(value),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ],

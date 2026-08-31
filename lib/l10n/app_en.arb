@@ -193,6 +193,14 @@
   },
   "about": "About OWRTPC",
   "privacySummary": "Local only · no cloud or analytics",
+  "appVersion": "Version",
+  "appVersionValue": "{version} ({buildNumber})",
+  "@appVersionValue": {
+    "placeholders": {
+      "version": { "type": "String" },
+      "buildNumber": { "type": "String" }
+    }
+  },
   "signOut": "Sign out",
   "familyProfile": "Family",
   "childrenProfile": "Children",

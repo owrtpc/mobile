@@ -746,6 +746,18 @@ abstract class AppLocalizations {
   /// **'Local only · no cloud or analytics'**
   String get privacySummary;
 
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get appVersion;
+
+  /// No description provided for @appVersionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} ({buildNumber})'**
+  String appVersionValue(String version, String buildNumber);
+
   /// No description provided for @signOut.
   ///
   /// In en, this message translates to:
