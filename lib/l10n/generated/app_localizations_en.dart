@@ -84,6 +84,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addTime => 'Add time';
 
   @override
+  String get addTimeUnavailableBedtime =>
+      'Add time is unavailable during bedtime.';
+
+  @override
+  String get addTimeUnavailableBlocked =>
+      'Add time is unavailable while this profile is blocked. Unblock it first.';
+
+  @override
+  String get addTimeUnavailableUnlimited =>
+      'Add time is unnecessary because this profile is already unlimited today.';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String blockProfileTitle(String profile) {
+    return 'Block $profile?';
+  }
+
+  @override
+  String get blockProfileBody =>
+      'Internet access for the devices in this profile will be interrupted immediately.';
+
+  @override
+  String disableProfileTitle(String profile) {
+    return 'Disable $profile?';
+  }
+
+  @override
+  String get disableProfileBody =>
+      'OWRTPC will stop accounting and enforcing this profile until you enable it again.';
+
+  @override
+  String get disableProfileAction => 'Disable';
+
+  @override
+  String addTimeTitle(String profile) {
+    return 'Add time to $profile';
+  }
+
+  @override
+  String get addTimeExplanation =>
+      'This replaces any previous extra-time choice and lasts only until bedtime or the router’s next local day.';
+
+  @override
+  String get addOneHour => '+1 hour';
+
+  @override
+  String get addFourHours => '+4 hours';
+
+  @override
+  String get addAllDay => 'All Day';
+
+  @override
+  String profileBlockedSuccess(String profile) {
+    return '$profile is now blocked.';
+  }
+
+  @override
+  String profileUnblockedSuccess(String profile) {
+    return '$profile is no longer manually blocked.';
+  }
+
+  @override
+  String profileEnabledSuccess(String profile) {
+    return '$profile is now enabled.';
+  }
+
+  @override
+  String profileDisabledSuccess(String profile) {
+    return '$profile is now disabled.';
+  }
+
+  @override
+  String profileTimeAddedSuccess(String profile, String time) {
+    return '$time selected for $profile.';
+  }
+
+  @override
+  String get quickActionUnknown =>
+      'The router may have applied the change, but OWRTPC could not confirm it. The latest status was requested and the action was not repeated.';
+
+  @override
+  String get quickActionFailed =>
+      'The router rejected the change. No automatic retry was attempted.';
+
+  @override
+  String get staleProfilesNotice =>
+      'This profile data may be out of date. Refresh the connection before making changes.';
+
+  @override
+  String disableProfileA11y(String profile) {
+    return 'Disable $profile';
+  }
+
+  @override
+  String enableProfileA11y(String profile) {
+    return 'Enable $profile';
+  }
+
+  @override
+  String profileActionInProgress(String profile) {
+    return 'Updating $profile';
+  }
+
+  @override
   String get fixtureNotice => 'Preview mode — sample profile data';
 
   @override
@@ -136,6 +242,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordField => 'Password';
+
+  @override
+  String get showPasswordAction => 'Show password';
+
+  @override
+  String get hidePasswordAction => 'Hide password';
 
   @override
   String get connectAction => 'Connect securely';

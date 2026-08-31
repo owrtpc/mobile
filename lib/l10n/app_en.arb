@@ -35,6 +35,67 @@
   "block": "Block",
   "unblock": "Unblock",
   "addTime": "Add time",
+  "addTimeUnavailableBedtime": "Add time is unavailable during bedtime.",
+  "addTimeUnavailableBlocked": "Add time is unavailable while this profile is blocked. Unblock it first.",
+  "addTimeUnavailableUnlimited": "Add time is unnecessary because this profile is already unlimited today.",
+  "cancelAction": "Cancel",
+  "blockProfileTitle": "Block {profile}?",
+  "@blockProfileTitle": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "blockProfileBody": "Internet access for the devices in this profile will be interrupted immediately.",
+  "disableProfileTitle": "Disable {profile}?",
+  "@disableProfileTitle": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "disableProfileBody": "OWRTPC will stop accounting and enforcing this profile until you enable it again.",
+  "disableProfileAction": "Disable",
+  "addTimeTitle": "Add time to {profile}",
+  "@addTimeTitle": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "addTimeExplanation": "This replaces any previous extra-time choice and lasts only until bedtime or the router’s next local day.",
+  "addOneHour": "+1 hour",
+  "addFourHours": "+4 hours",
+  "addAllDay": "All Day",
+  "profileBlockedSuccess": "{profile} is now blocked.",
+  "@profileBlockedSuccess": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "profileUnblockedSuccess": "{profile} is no longer manually blocked.",
+  "@profileUnblockedSuccess": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "profileEnabledSuccess": "{profile} is now enabled.",
+  "@profileEnabledSuccess": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "profileDisabledSuccess": "{profile} is now disabled.",
+  "@profileDisabledSuccess": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "profileTimeAddedSuccess": "{time} selected for {profile}.",
+  "@profileTimeAddedSuccess": {
+    "placeholders": {
+      "profile": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "quickActionUnknown": "The router may have applied the change, but OWRTPC could not confirm it. The latest status was requested and the action was not repeated.",
+  "quickActionFailed": "The router rejected the change. No automatic retry was attempted.",
+  "staleProfilesNotice": "This profile data may be out of date. Refresh the connection before making changes.",
+  "disableProfileA11y": "Disable {profile}",
+  "@disableProfileA11y": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "enableProfileA11y": "Enable {profile}",
+  "@enableProfileA11y": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
+  "profileActionInProgress": "Updating {profile}",
+  "@profileActionInProgress": {
+    "placeholders": { "profile": { "type": "String" } }
+  },
   "fixtureNotice": "Preview mode — sample profile data",
   "loadingProfiles": "Loading profiles…",
   "loadProfilesError": "Profiles could not be loaded from the router.",
@@ -62,6 +123,8 @@
   "routerAddressHint": "openwrt.lan or 192.168.1.1",
   "usernameField": "Username",
   "passwordField": "Password",
+  "showPasswordAction": "Show password",
+  "hidePasswordAction": "Hide password",
   "connectAction": "Connect securely",
   "connectingAction": "Checking router…",
   "requiredField": "This field is required",

@@ -84,6 +84,112 @@ class AppLocalizationsIt extends AppLocalizations {
   String get addTime => 'Aggiungi tempo';
 
   @override
+  String get addTimeUnavailableBedtime =>
+      'Non puoi aggiungere tempo durante l’orario di riposo.';
+
+  @override
+  String get addTimeUnavailableBlocked =>
+      'Non puoi aggiungere tempo mentre il profilo è bloccato. Prima sbloccalo.';
+
+  @override
+  String get addTimeUnavailableUnlimited =>
+      'Non serve aggiungere tempo: oggi questo profilo è già illimitato.';
+
+  @override
+  String get cancelAction => 'Annulla';
+
+  @override
+  String blockProfileTitle(String profile) {
+    return 'Bloccare $profile?';
+  }
+
+  @override
+  String get blockProfileBody =>
+      'L’accesso a Internet dei dispositivi di questo profilo verrà interrotto immediatamente.';
+
+  @override
+  String disableProfileTitle(String profile) {
+    return 'Disattivare $profile?';
+  }
+
+  @override
+  String get disableProfileBody =>
+      'OWRTPC interromperà il conteggio e l’applicazione delle regole di questo profilo finché non lo riattivi.';
+
+  @override
+  String get disableProfileAction => 'Disattiva';
+
+  @override
+  String addTimeTitle(String profile) {
+    return 'Aggiungi tempo a $profile';
+  }
+
+  @override
+  String get addTimeExplanation =>
+      'La scelta sostituisce qualsiasi tempo extra precedente e dura soltanto fino all’orario di riposo o al prossimo giorno locale del router.';
+
+  @override
+  String get addOneHour => '+1 ora';
+
+  @override
+  String get addFourHours => '+4 ore';
+
+  @override
+  String get addAllDay => 'Tutto il giorno';
+
+  @override
+  String profileBlockedSuccess(String profile) {
+    return '$profile è ora bloccato.';
+  }
+
+  @override
+  String profileUnblockedSuccess(String profile) {
+    return '$profile non è più bloccato manualmente.';
+  }
+
+  @override
+  String profileEnabledSuccess(String profile) {
+    return '$profile è ora attivo.';
+  }
+
+  @override
+  String profileDisabledSuccess(String profile) {
+    return '$profile è ora disattivato.';
+  }
+
+  @override
+  String profileTimeAddedSuccess(String profile, String time) {
+    return '$time selezionato per $profile.';
+  }
+
+  @override
+  String get quickActionUnknown =>
+      'Il router potrebbe aver applicato la modifica, ma OWRTPC non ha potuto confermarla. È stato richiesto lo stato più recente e l’azione non è stata ripetuta.';
+
+  @override
+  String get quickActionFailed =>
+      'Il router ha rifiutato la modifica. Non è stato eseguito alcun tentativo automatico.';
+
+  @override
+  String get staleProfilesNotice =>
+      'I dati dei profili potrebbero non essere aggiornati. Ripristina la connessione prima di apportare modifiche.';
+
+  @override
+  String disableProfileA11y(String profile) {
+    return 'Disattiva $profile';
+  }
+
+  @override
+  String enableProfileA11y(String profile) {
+    return 'Attiva $profile';
+  }
+
+  @override
+  String profileActionInProgress(String profile) {
+    return 'Aggiornamento di $profile';
+  }
+
+  @override
   String get fixtureNotice => 'Modalità anteprima — dati profilo dimostrativi';
 
   @override
@@ -136,6 +242,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get passwordField => 'Password';
+
+  @override
+  String get showPasswordAction => 'Mostra password';
+
+  @override
+  String get hidePasswordAction => 'Nascondi password';
 
   @override
   String get connectAction => 'Connetti in modo sicuro';

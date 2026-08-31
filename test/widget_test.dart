@@ -7,6 +7,7 @@ import 'package:owrtpc_mobile/app/app.dart';
 import 'package:owrtpc_mobile/app/app_preferences.dart';
 import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
+import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 
 void main() {
@@ -17,6 +18,11 @@ void main() {
     expect(find.text('Connect securely'), findsOneWidget);
     expect(find.byKey(const Key('router-address-field')), findsOneWidget);
     expect(find.text('Profiles'), findsNothing);
+
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    await tester.tap(find.byKey(const Key('password-visibility-action')));
+    await tester.pump();
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
   });
 
   testWidgets('enters the app after the complete router handshake', (
@@ -34,7 +40,10 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
-        connectionService: RouterConnectionService(transport: transport),
+        connectionService: RouterConnectionService(
+          transport: transport,
+          endpointResolver: RouterEndpointResolver(probe: (_) async => true),
+        ),
       ),
     );
 

@@ -20,6 +20,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _certificateCompared = false;
+  bool _passwordObscured = true;
 
   @override
   void dispose() {
@@ -112,13 +113,27 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         controller: _passwordController,
                         autofillHints: const [AutofillHints.password],
                         textInputAction: TextInputAction.done,
-                        obscureText: true,
+                        obscureText: _passwordObscured,
                         enableSuggestions: false,
                         autocorrect: false,
                         onFieldSubmitted: (_) => _submit(),
                         decoration: InputDecoration(
                           labelText: strings.passwordField,
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
+                          suffixIcon: IconButton(
+                            key: const Key('password-visibility-action'),
+                            tooltip: _passwordObscured
+                                ? strings.showPasswordAction
+                                : strings.hidePasswordAction,
+                            onPressed: () => setState(() {
+                              _passwordObscured = !_passwordObscured;
+                            }),
+                            icon: Icon(
+                              _passwordObscured
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                          ),
                         ),
                         validator: (value) => _required(strings, value),
                       ),

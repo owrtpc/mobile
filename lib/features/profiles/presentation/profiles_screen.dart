@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -9,25 +11,47 @@ class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
     required this.router,
     required this.repository,
-    this.enableWrites = false,
     super.key,
   });
 
   final ConnectedRouter router;
   final ProfilesRepository repository;
-  final bool enableWrites;
 
   @override
   State<ProfilesScreen> createState() => _ProfilesScreenState();
 }
 
-class _ProfilesScreenState extends State<ProfilesScreen> {
-  late Future<List<ProfileSummary>> _profiles;
+class _ProfilesScreenState extends State<ProfilesScreen>
+    with WidgetsBindingObserver {
+  static const _freshnessWindow = Duration(seconds: 90);
+
+  List<ProfileSummary>? _profiles;
+  Object? _loadError;
+  DateTime? _lastSuccessfulRefresh;
+  String? _busyProfile;
+  bool _loading = true;
+  bool _connectionHealthy = false;
+  bool _reloadAfterAction = false;
+  Timer? _freshnessTimer;
+
+  bool get _isFresh {
+    final refreshed = _lastSuccessfulRefresh;
+    return refreshed != null &&
+        DateTime.now().difference(refreshed) < _freshnessWindow;
+  }
+
+  bool get _supportsWrites =>
+      widget.router.canWrite &&
+      widget.router.capabilities.features.contains('quick-actions');
 
   @override
   void initState() {
     super.initState();
-    _profiles = widget.repository.load(widget.router);
+    WidgetsBinding.instance.addObserver(this);
+    _freshnessTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) setState(() {});
+    });
+    unawaited(_reload(showLoading: true));
   }
 
   @override
@@ -35,22 +59,64 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.router.sessionToken != widget.router.sessionToken ||
         oldWidget.repository.runtimeType != widget.repository.runtimeType) {
-      _profiles = widget.repository.load(widget.router);
+      _profiles = null;
+      _lastSuccessfulRefresh = null;
+      _connectionHealthy = false;
+      unawaited(_reload(showLoading: true));
     }
   }
 
-  Future<void> _reload() async {
-    final profiles = widget.repository.load(widget.router);
-    setState(() {
-      _profiles = profiles;
-    });
-    await profiles;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    if (_busyProfile != null) {
+      _reloadAfterAction = true;
+    } else {
+      unawaited(_reload());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _freshnessTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _reload({bool showLoading = false}) async {
+    if (_busyProfile != null) {
+      _reloadAfterAction = true;
+      return;
+    }
+    if (showLoading && mounted) {
+      setState(() {
+        _loading = true;
+        _loadError = null;
+      });
+    }
+    try {
+      final profiles = await widget.repository.load(widget.router);
+      if (!mounted) return;
+      setState(() {
+        _profiles = profiles;
+        _loading = false;
+        _loadError = null;
+        _connectionHealthy = true;
+        _lastSuccessfulRefresh = DateTime.now();
+      });
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadError = error;
+        _connectionHealthy = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    final canModify = widget.enableWrites && widget.router.canWrite;
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -66,92 +132,297 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         actions: [
           IconButton(
             tooltip: strings.refreshTooltip,
-            onPressed: _reload,
+            onPressed: _busyProfile == null ? _reload : null,
             icon: const Icon(Icons.refresh_rounded),
           ),
-          if (canModify)
-            IconButton(
-              tooltip: strings.addProfileTooltip,
-              onPressed: () {},
-              icon: const Icon(Icons.add_rounded),
-            ),
         ],
       ),
-      body: FutureBuilder<List<ProfileSummary>>(
-        future: _profiles,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 14),
-                  Text(strings.loadingProfiles),
-                ],
+      body: _buildBody(strings),
+    );
+  }
+
+  Widget _buildBody(AppLocalizations strings) {
+    final profiles = _profiles;
+    if (_loading && profiles == null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 14),
+            Text(strings.loadingProfiles),
+          ],
+        ),
+      );
+    }
+    if (profiles == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_off_rounded, size: 44),
+              const SizedBox(height: 12),
+              Text(strings.loadProfilesError, textAlign: TextAlign.center),
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: () => _reload(showLoading: true),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(strings.retryAction),
               ),
-            );
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.cloud_off_rounded, size: 44),
-                    const SizedBox(height: 12),
-                    Text(
-                      strings.loadProfilesError,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 14),
-                    FilledButton.icon(
-                      onPressed: _reload,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(strings.retryAction),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          final profiles = snapshot.data ?? const [];
-          return RefreshIndicator(
-            onRefresh: _reload,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              children: [
-                if (widget.router.isPreview) ...[
-                  _PreviewNotice(label: strings.fixtureNotice),
-                  const SizedBox(height: 12),
-                ],
-                if (profiles.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 48),
-                    child: Text(
-                      strings.noProfiles,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                for (final profile in profiles) ...[
-                  _ProfileCard(profile: profile, canWrite: canModify),
-                  const SizedBox(height: 12),
-                ],
-              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    final dataIsFresh = _connectionHealthy && _loadError == null && _isFresh;
+    final actionsEnabled = dataIsFresh && _busyProfile == null;
+    return RefreshIndicator(
+      onRefresh: _reload,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        children: [
+          if (widget.router.isPreview) ...[
+            _Notice(label: strings.fixtureNotice, icon: Icons.science_outlined),
+            const SizedBox(height: 12),
+          ],
+          if (!dataIsFresh) ...[
+            _Notice(
+              key: const Key('stale-profiles-notice'),
+              label: strings.staleProfilesNotice,
+              icon: Icons.sync_problem_rounded,
             ),
-          );
-        },
+            const SizedBox(height: 12),
+          ],
+          if (profiles.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48),
+              child: Text(strings.noProfiles, textAlign: TextAlign.center),
+            ),
+          for (final profile in profiles) ...[
+            _ProfileCard(
+              profile: profile,
+              showWriteControls: _supportsWrites,
+              actionsEnabled: actionsEnabled,
+              busy: _busyProfile == profile.section,
+              onBlockedChanged: () => _changeBlocked(profile),
+              onEnabledChanged: (enabled) => _changeEnabled(profile, enabled),
+              onAddTime: () => _chooseExtraTime(profile),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ],
       ),
     );
   }
+
+  Future<void> _changeBlocked(ProfileSummary profile) async {
+    final blocked = !profile.manualBlocked;
+    if (blocked) {
+      final confirmed = await _confirm(
+        title: AppLocalizations.of(context).blockProfileTitle(profile.name),
+        body: AppLocalizations.of(context).blockProfileBody,
+        action: AppLocalizations.of(context).block,
+      );
+      if (!confirmed || !mounted) return;
+    }
+    final strings = AppLocalizations.of(context);
+    await _runQuickAction(
+      profile,
+      () => widget.repository.setBlocked(
+        widget.router,
+        profile,
+        blocked: blocked,
+      ),
+      successMessage: blocked
+          ? strings.profileBlockedSuccess(profile.name)
+          : strings.profileUnblockedSuccess(profile.name),
+    );
+  }
+
+  Future<void> _changeEnabled(ProfileSummary profile, bool enabled) async {
+    if (!enabled) {
+      final confirmed = await _confirm(
+        title: AppLocalizations.of(context).disableProfileTitle(profile.name),
+        body: AppLocalizations.of(context).disableProfileBody,
+        action: AppLocalizations.of(context).disableProfileAction,
+      );
+      if (!confirmed || !mounted) return;
+    }
+    final strings = AppLocalizations.of(context);
+    await _runQuickAction(
+      profile,
+      () => widget.repository.setEnabled(
+        widget.router,
+        profile,
+        enabled: enabled,
+      ),
+      successMessage: enabled
+          ? strings.profileEnabledSuccess(profile.name)
+          : strings.profileDisabledSuccess(profile.name),
+    );
+  }
+
+  Future<void> _chooseExtraTime(ProfileSummary profile) async {
+    final strings = AppLocalizations.of(context);
+    final choice = await showModalBottomSheet<ExtraTimeChoice>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  strings.addTimeTitle(profile.name),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(strings.addTimeExplanation),
+                const SizedBox(height: 12),
+                _ExtraTimeTile(
+                  key: const Key('add-one-hour'),
+                  label: strings.addOneHour,
+                  onTap: () => Navigator.pop(context, ExtraTimeChoice.oneHour),
+                ),
+                _ExtraTimeTile(
+                  key: const Key('add-four-hours'),
+                  label: strings.addFourHours,
+                  onTap: () =>
+                      Navigator.pop(context, ExtraTimeChoice.fourHours),
+                ),
+                _ExtraTimeTile(
+                  key: const Key('add-all-day'),
+                  label: strings.addAllDay,
+                  onTap: () => Navigator.pop(context, ExtraTimeChoice.allDay),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    final choiceLabel = switch (choice) {
+      ExtraTimeChoice.oneHour => strings.addOneHour,
+      ExtraTimeChoice.fourHours => strings.addFourHours,
+      ExtraTimeChoice.allDay => strings.addAllDay,
+    };
+    await _runQuickAction(
+      profile,
+      () => widget.repository.addTime(widget.router, profile, choice),
+      successMessage: strings.profileTimeAddedSuccess(
+        profile.name,
+        choiceLabel,
+      ),
+    );
+  }
+
+  Future<bool> _confirm({
+    required String title,
+    required String body,
+    required String action,
+  }) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context).cancelAction),
+            ),
+            FilledButton(
+              key: const Key('confirm-quick-action'),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(action),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+
+  Future<void> _runQuickAction(
+    ProfileSummary profile,
+    Future<ProfileQuickActionResult> Function() operation, {
+    required String successMessage,
+  }) async {
+    if (_busyProfile != null) return;
+    setState(() {
+      _busyProfile = profile.section;
+    });
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+    try {
+      final result = await operation();
+      if (!mounted) return;
+      final refreshed = result.profiles;
+      setState(() {
+        if (refreshed != null) {
+          _profiles = refreshed;
+          _loadError = null;
+          _connectionHealthy = true;
+          _lastSuccessfulRefresh = DateTime.now();
+        } else {
+          _connectionHealthy = false;
+        }
+      });
+      messenger.showSnackBar(
+        SnackBar(
+          key: Key(
+            result.status == ProfileQuickActionStatus.confirmed
+                ? 'quick-action-success'
+                : 'quick-action-unknown',
+          ),
+          content: Text(
+            result.status == ProfileQuickActionStatus.confirmed
+                ? successMessage
+                : AppLocalizations.of(context).quickActionUnknown,
+          ),
+        ),
+      );
+    } on ProfileQuickActionException {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          key: const Key('quick-action-failed'),
+          content: Text(AppLocalizations.of(context).quickActionFailed),
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          key: const Key('quick-action-failed'),
+          content: Text(AppLocalizations.of(context).quickActionFailed),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busyProfile = null;
+        });
+        if (_reloadAfterAction) {
+          _reloadAfterAction = false;
+          unawaited(_reload());
+        }
+      }
+    }
+  }
 }
 
-class _PreviewNotice extends StatelessWidget {
-  const _PreviewNotice({required this.label});
+class _Notice extends StatelessWidget {
+  const _Notice({required this.label, required this.icon, super.key});
 
   final String label;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -162,7 +433,7 @@ class _PreviewNotice extends StatelessWidget {
     ),
     child: Row(
       children: [
-        const Icon(Icons.science_outlined, size: 20),
+        Icon(icon, size: 20),
         const SizedBox(width: 10),
         Expanded(child: Text(label)),
       ],
@@ -171,16 +442,29 @@ class _PreviewNotice extends StatelessWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.profile, required this.canWrite});
+  const _ProfileCard({
+    required this.profile,
+    required this.showWriteControls,
+    required this.actionsEnabled,
+    required this.busy,
+    required this.onBlockedChanged,
+    required this.onEnabledChanged,
+    required this.onAddTime,
+  });
 
   final ProfileSummary profile;
-  final bool canWrite;
+  final bool showWriteControls;
+  final bool actionsEnabled;
+  final bool busy;
+  final VoidCallback onBlockedChanged;
+  final ValueChanged<bool> onEnabledChanged;
+  final VoidCallback onAddTime;
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final blocked = profile.state == ProfileState.manuallyBlocked;
+    final blocked = profile.manualBlocked;
     final profileName = profile.name;
     final stateLabel = switch (profile.state) {
       ProfileState.allowed => strings.allowed,
@@ -197,6 +481,14 @@ class _ProfileCard extends StatelessWidget {
       ProfileState.disabled => Icons.pause_circle_outline_rounded,
     };
     final stateColor = blocked ? scheme.error : scheme.primary;
+    final addTimeUnavailableMessage = switch (profile) {
+      ProfileSummary(state: ProfileState.bedtime) =>
+        strings.addTimeUnavailableBedtime,
+      ProfileSummary(manualBlocked: true) => strings.addTimeUnavailableBlocked,
+      ProfileSummary(allowanceSeconds: 0, allDay: false) =>
+        strings.addTimeUnavailableUnlimited,
+      _ => null,
+    };
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -217,9 +509,36 @@ class _ProfileCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                if (canWrite) Switch(value: profile.enabled, onChanged: (_) {}),
+                if (showWriteControls)
+                  Semantics(
+                    key: Key('enabled-semantics-${profile.section}'),
+                    label: profile.enabled
+                        ? strings.disableProfileA11y(profileName)
+                        : strings.enableProfileA11y(profileName),
+                    toggled: profile.enabled,
+                    enabled: actionsEnabled && !busy,
+                    onTap: actionsEnabled && !busy
+                        ? () => onEnabledChanged(!profile.enabled)
+                        : null,
+                    child: ExcludeSemantics(
+                      child: Switch(
+                        key: Key('enabled-switch-${profile.section}'),
+                        value: profile.enabled,
+                        onChanged: actionsEnabled && !busy
+                            ? onEnabledChanged
+                            : null,
+                      ),
+                    ),
+                  ),
               ],
             ),
+            if (busy) ...[
+              const SizedBox(height: 10),
+              Semantics(
+                label: strings.profileActionInProgress(profileName),
+                child: const LinearProgressIndicator(),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               children: [
@@ -267,13 +586,16 @@ class _ProfileCard extends StatelessWidget {
                 Text(strings.deviceCount(profile.deviceCount)),
               ],
             ),
-            if (canWrite) ...[
+            if (showWriteControls && profile.enabled) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      key: Key('block-action-${profile.section}'),
+                      onPressed: actionsEnabled && !busy
+                          ? onBlockedChanged
+                          : null,
                       icon: Icon(
                         blocked ? Icons.lock_open_rounded : Icons.block_rounded,
                       ),
@@ -283,13 +605,37 @@ class _ProfileCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: blocked ? null : () {},
+                      key: Key('add-time-${profile.section}'),
+                      onPressed: actionsEnabled && !busy && profile.canAddTime
+                          ? onAddTime
+                          : null,
                       icon: const Icon(Icons.more_time_rounded),
                       label: Text(strings.addTime),
                     ),
                   ),
                 ],
               ),
+              if (addTimeUnavailableMessage != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.more_time_rounded,
+                      size: 16,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        addTimeUnavailableMessage,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ],
         ),
@@ -307,4 +653,20 @@ class _ProfileCard extends StatelessWidget {
     if (hours > 0) return strings.durationHours(hours);
     return strings.durationMinutes(minutes);
   }
+}
+
+class _ExtraTimeTile extends StatelessWidget {
+  const _ExtraTimeTile({required this.label, required this.onTap, super.key});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    leading: const Icon(Icons.more_time_rounded),
+    title: Text(label),
+    trailing: const Icon(Icons.chevron_right_rounded),
+    onTap: onTap,
+  );
 }

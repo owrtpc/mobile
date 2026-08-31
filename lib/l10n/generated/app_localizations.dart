@@ -218,6 +218,156 @@ abstract class AppLocalizations {
   /// **'Add time'**
   String get addTime;
 
+  /// No description provided for @addTimeUnavailableBedtime.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time is unavailable during bedtime.'**
+  String get addTimeUnavailableBedtime;
+
+  /// No description provided for @addTimeUnavailableBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time is unavailable while this profile is blocked. Unblock it first.'**
+  String get addTimeUnavailableBlocked;
+
+  /// No description provided for @addTimeUnavailableUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time is unnecessary because this profile is already unlimited today.'**
+  String get addTimeUnavailableUnlimited;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// No description provided for @blockProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {profile}?'**
+  String blockProfileTitle(String profile);
+
+  /// No description provided for @blockProfileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Internet access for the devices in this profile will be interrupted immediately.'**
+  String get blockProfileBody;
+
+  /// No description provided for @disableProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable {profile}?'**
+  String disableProfileTitle(String profile);
+
+  /// No description provided for @disableProfileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'OWRTPC will stop accounting and enforcing this profile until you enable it again.'**
+  String get disableProfileBody;
+
+  /// No description provided for @disableProfileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get disableProfileAction;
+
+  /// No description provided for @addTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time to {profile}'**
+  String addTimeTitle(String profile);
+
+  /// No description provided for @addTimeExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This replaces any previous extra-time choice and lasts only until bedtime or the router’s next local day.'**
+  String get addTimeExplanation;
+
+  /// No description provided for @addOneHour.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 hour'**
+  String get addOneHour;
+
+  /// No description provided for @addFourHours.
+  ///
+  /// In en, this message translates to:
+  /// **'+4 hours'**
+  String get addFourHours;
+
+  /// No description provided for @addAllDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All Day'**
+  String get addAllDay;
+
+  /// No description provided for @profileBlockedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{profile} is now blocked.'**
+  String profileBlockedSuccess(String profile);
+
+  /// No description provided for @profileUnblockedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{profile} is no longer manually blocked.'**
+  String profileUnblockedSuccess(String profile);
+
+  /// No description provided for @profileEnabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{profile} is now enabled.'**
+  String profileEnabledSuccess(String profile);
+
+  /// No description provided for @profileDisabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{profile} is now disabled.'**
+  String profileDisabledSuccess(String profile);
+
+  /// No description provided for @profileTimeAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} selected for {profile}.'**
+  String profileTimeAddedSuccess(String profile, String time);
+
+  /// No description provided for @quickActionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The router may have applied the change, but OWRTPC could not confirm it. The latest status was requested and the action was not repeated.'**
+  String get quickActionUnknown;
+
+  /// No description provided for @quickActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The router rejected the change. No automatic retry was attempted.'**
+  String get quickActionFailed;
+
+  /// No description provided for @staleProfilesNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This profile data may be out of date. Refresh the connection before making changes.'**
+  String get staleProfilesNotice;
+
+  /// No description provided for @disableProfileA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable {profile}'**
+  String disableProfileA11y(String profile);
+
+  /// No description provided for @enableProfileA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable {profile}'**
+  String enableProfileA11y(String profile);
+
+  /// No description provided for @profileActionInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating {profile}'**
+  String profileActionInProgress(String profile);
+
   /// No description provided for @fixtureNotice.
   ///
   /// In en, this message translates to:
@@ -307,6 +457,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get passwordField;
+
+  /// No description provided for @showPasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPasswordAction;
+
+  /// No description provided for @hidePasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePasswordAction;
 
   /// No description provided for @connectAction.
   ///

@@ -40,14 +40,19 @@ published SHA-256 before extraction. CI builds the same image and rejects
 missing Italian/English translations, formatting drift, analyzer findings and
 test failures.
 
-## Current connection slice
+## Current connection and quick-action slice
 
 The app accepts router hosts only over HTTPS, calls the ubus JSON-RPC bridge at
 `/ubus`, performs `session.login`, checks read and quick-action ACLs, validates
 `owrtpc.capabilities` V1 and keeps the returned session only in memory. It then
 combines live `owrtpc.status` and committed `uci get owrtpc` data into the
-profile list. Logout best-effort destroys the router session. Profile writes
-remain hidden in this read-only slice.
+profile list. Logout best-effort destroys the router session.
+
+Write-capable accounts can block or unblock a profile, enable or disable it and
+replace the temporary extra-time choice with one hour, four hours or all day.
+Every write is followed by a fresh status read and is never retried
+automatically after an ambiguous result. Full profile creation and editing
+remain part of M3.
 
 TLS uses the operating system trust store first. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its

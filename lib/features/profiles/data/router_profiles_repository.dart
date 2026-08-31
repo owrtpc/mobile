@@ -49,12 +49,22 @@ class RouterProfilesRepository implements ProfilesRepository {
       final reason = rawProfile['reason'];
       final usedSeconds = rawProfile['used_seconds'];
       final allowanceSeconds = rawProfile['limit_seconds'];
+      final manualBlocked = rawProfile['manual_blocked'];
+      final bonusSeconds = rawProfile['bonus_seconds'];
+      final allDay = rawProfile['all_day'];
       if (section is! String ||
           section.isEmpty ||
           name is! String ||
           reason is! String ||
           usedSeconds is! num ||
           allowanceSeconds is! num) {
+        throw const FormatException('invalid profile status fields');
+      }
+      if (manualBlocked is! bool ||
+          bonusSeconds is! num ||
+          bonusSeconds != bonusSeconds.toInt() ||
+          bonusSeconds < 0 ||
+          allDay is! bool) {
         throw const FormatException('invalid profile status fields');
       }
       final rawConfiguration = rawValues[section];
@@ -76,6 +86,9 @@ class RouterProfilesRepository implements ProfilesRepository {
             _ => 0,
           },
           enabled: enabled,
+          manualBlocked: manualBlocked,
+          bonusSeconds: bonusSeconds.toInt(),
+          allDay: allDay,
         ),
       );
     }
@@ -91,5 +104,140 @@ class RouterProfilesRepository implements ProfilesRepository {
       'quota' => ProfileState.timeUsed,
       _ => throw const FormatException('unknown profile reason'),
     };
+  }
+
+  @override
+  Future<ProfileQuickActionResult> setBlocked(
+    ConnectedRouter router,
+    ProfileSummary profile, {
+    required bool blocked,
+  }) => _runQuickAction(
+    router,
+    profile,
+    method: 'set_block',
+    parameters: {'profile': profile.section, 'blocked': blocked},
+    responseIsValid: (response) => response['success'] == true,
+    stateMatches: (updated) => updated.manualBlocked == blocked,
+  );
+
+  @override
+  Future<ProfileQuickActionResult> setEnabled(
+    ConnectedRouter router,
+    ProfileSummary profile, {
+    required bool enabled,
+  }) => _runQuickAction(
+    router,
+    profile,
+    method: 'set_enabled',
+    parameters: {'profile': profile.section, 'enabled': enabled},
+    responseIsValid: (response) =>
+        response['success'] == true && response['enabled'] == enabled,
+    stateMatches: (updated) => updated.enabled == enabled,
+  );
+
+  @override
+  Future<ProfileQuickActionResult> addTime(
+    ConnectedRouter router,
+    ProfileSummary profile,
+    ExtraTimeChoice choice,
+  ) {
+    final minutes = switch (choice) {
+      ExtraTimeChoice.oneHour => 60,
+      ExtraTimeChoice.fourHours => 240,
+      ExtraTimeChoice.allDay => 'all-day',
+    };
+    return _runQuickAction(
+      router,
+      profile,
+      method: 'add_time',
+      parameters: {'profile': profile.section, 'minutes': minutes},
+      responseIsValid: (response) => switch (choice) {
+        ExtraTimeChoice.oneHour =>
+          response['success'] == true && response['added_seconds'] == 3600,
+        ExtraTimeChoice.fourHours =>
+          response['success'] == true && response['added_seconds'] == 14400,
+        ExtraTimeChoice.allDay =>
+          response['success'] == true && response['all_day'] == true,
+      },
+      stateMatches: (updated) => switch (choice) {
+        ExtraTimeChoice.oneHour =>
+          !updated.allDay && updated.bonusSeconds == 3600,
+        ExtraTimeChoice.fourHours =>
+          !updated.allDay && updated.bonusSeconds == 14400,
+        ExtraTimeChoice.allDay => updated.allDay,
+      },
+    );
+  }
+
+  Future<ProfileQuickActionResult> _runQuickAction(
+    ConnectedRouter router,
+    ProfileSummary profile, {
+    required String method,
+    required Map<String, Object?> parameters,
+    required bool Function(Map<String, Object?> response) responseIsValid,
+    required bool Function(ProfileSummary profile) stateMatches,
+  }) async {
+    final client = JsonRpcClient(
+      endpoint: router.endpoint.uri,
+      transport: transport,
+    );
+    try {
+      final response = await client.call(
+        session: router.sessionToken,
+        object: 'owrtpc',
+        method: method,
+        parameters: parameters,
+      );
+      if (!responseIsValid(response)) return await _recover(router);
+    } on UbusException {
+      throw const ProfileQuickActionException();
+    } on JsonRpcTransportException {
+      return _recover(router);
+    } on JsonRpcProtocolException {
+      return _recover(router);
+    } on FormatException {
+      return _recover(router);
+    }
+
+    final profiles = await _loadForVerification(router);
+    if (profiles == null) {
+      return const ProfileQuickActionResult(
+        status: ProfileQuickActionStatus.outcomeUnknown,
+        profiles: null,
+      );
+    }
+    final updated = _findProfile(profiles, profile.section);
+    return ProfileQuickActionResult(
+      status: updated != null && stateMatches(updated)
+          ? ProfileQuickActionStatus.confirmed
+          : ProfileQuickActionStatus.outcomeUnknown,
+      profiles: profiles,
+    );
+  }
+
+  Future<ProfileQuickActionResult> _recover(ConnectedRouter router) async =>
+      ProfileQuickActionResult(
+        status: ProfileQuickActionStatus.outcomeUnknown,
+        profiles: await _loadForVerification(router),
+      );
+
+  Future<List<ProfileSummary>?> _loadForVerification(
+    ConnectedRouter router,
+  ) async {
+    try {
+      return await load(router);
+    } on Object {
+      return null;
+    }
+  }
+
+  static ProfileSummary? _findProfile(
+    List<ProfileSummary> profiles,
+    String section,
+  ) {
+    for (final profile in profiles) {
+      if (profile.section == section) return profile;
+    }
+    return null;
   }
 }
