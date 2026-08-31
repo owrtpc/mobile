@@ -6,14 +6,15 @@
     {
       "api": "owrtpc-mobile",
       "major": 1,
-      "minor": 0,
-      "backend_version": "0.1.0_alpha1-r23",
+      "minor": 1,
+      "backend_version": "0.1.0_alpha1-r25",
       "features": [
         "profiles.read",
         "profiles.write",
         "quick-actions",
         "device-discovery",
-        "uci-apply-confirm"
+        "uci-apply-confirm",
+        "schedule-periods"
       ],
       "router_date": "2026-08-28",
       "router_timezone": "Europe/Rome"

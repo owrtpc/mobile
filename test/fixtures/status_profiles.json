@@ -10,6 +10,8 @@
       "reason": "quota",
       "manual_blocked": false,
       "schedule": "weekday",
+      "allowance_period": "mon_thu",
+      "bedtime_period": "sun_thu",
       "bonus_seconds": 0,
       "all_day": false,
       "blocked": true

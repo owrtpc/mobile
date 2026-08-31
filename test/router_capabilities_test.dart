@@ -5,9 +5,9 @@ void main() {
   Map<String, Object?> validCapabilities() => {
     'api': 'owrtpc-mobile',
     'major': 1,
-    'minor': 0,
-    'backend_version': '0.1.0_alpha1-r23',
-    'features': ['profiles.read', 'profiles.write'],
+    'minor': 1,
+    'backend_version': '0.1.0_alpha1-r25',
+    'features': ['profiles.read', 'profiles.write', 'schedule-periods'],
     'router_date': '2026-08-28',
     'router_timezone': 'Europe/Rome',
   };
@@ -17,7 +17,8 @@ void main() {
 
     expect(capabilities.isCompatible, isTrue);
     expect(capabilities.features, contains('profiles.read'));
-    expect(capabilities.backendVersion, '0.1.0_alpha1-r23');
+    expect(capabilities.supportsSchedulePeriods, isTrue);
+    expect(capabilities.backendVersion, '0.1.0_alpha1-r25');
   });
 
   test('reports an unsupported major as incompatible', () {

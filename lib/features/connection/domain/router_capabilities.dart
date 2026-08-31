@@ -21,6 +21,7 @@ class RouterCapabilities {
   final String routerTimezone;
 
   bool get isCompatible => api == supportedApi && major == supportedMajor;
+  bool get supportsSchedulePeriods => features.contains('schedule-periods');
 
   factory RouterCapabilities.fromJson(Map<String, Object?> json) {
     final api = json['api'];
