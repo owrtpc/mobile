@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
+import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connection_failure.dart';
 
 void main() {
@@ -15,7 +16,10 @@ void main() {
       _fixture('capabilities_success.json'),
       _fixture('logout_success.json'),
     ]);
-    final service = RouterConnectionService(transport: transport);
+    final service = RouterConnectionService(
+      transport: transport,
+      endpointResolver: _reachableEndpointResolver(),
+    );
 
     final router = await service.connect(
       address: 'openwrt.lan',
@@ -34,12 +38,17 @@ void main() {
     expect(_method(transport.calls[3]), 'capabilities');
     expect(_session(transport.calls[0]), '00000000000000000000000000000000');
     expect(_session(transport.calls[1]), '0123456789abcdef0123456789abcdef');
+    expect(
+      _parameters(transport.calls[1]),
+      isNot(contains('ubus_rpc_session')),
+    );
 
     await service.signOut(router);
 
     expect(transport.calls, hasLength(5));
     expect(_method(transport.calls[4]), 'destroy');
     expect(_session(transport.calls[4]), '0123456789abcdef0123456789abcdef');
+    expect(_parameters(transport.calls[4]), isEmpty);
   });
 
   test('rejects HTTP before sending credentials', () async {
@@ -64,6 +73,9 @@ void main() {
   });
 }
 
+RouterEndpointResolver _reachableEndpointResolver() =>
+    RouterEndpointResolver(probe: (_) async => true);
+
 Map<String, Object?> _fixture(String name) {
   final decoded = jsonDecode(File('test/fixtures/$name').readAsStringSync());
   return Map<String, Object?>.from(decoded as Map);
@@ -74,6 +86,9 @@ String _method(Map<String, Object?> request) =>
 
 String _session(Map<String, Object?> request) =>
     (request['params']! as List<Object?>).first! as String;
+
+Map<String, Object?> _parameters(Map<String, Object?> request) =>
+    (request['params']! as List<Object?>)[3]! as Map<String, Object?>;
 
 class _FixtureTransport implements JsonRpcTransport {
   _FixtureTransport(this._responses);

@@ -1,7 +1,8 @@
 class RouterEndpoint {
-  const RouterEndpoint._(this.uri);
+  const RouterEndpoint._(this.uri, {required this.hasExplicitPort});
 
   final Uri uri;
+  final bool hasExplicitPort;
 
   factory RouterEndpoint.parse(String input) {
     final value = input.trim();
@@ -29,8 +30,12 @@ class RouterEndpoint {
         port: parsed.hasPort ? parsed.port : null,
         path: '/ubus',
       ),
+      hasExplicitPort: parsed.hasPort,
     );
   }
+
+  RouterEndpoint withPort(int port) =>
+      RouterEndpoint._(uri.replace(port: port), hasExplicitPort: true);
 
   String get displayAddress {
     final host = uri.host.contains(':') ? '[${uri.host}]' : uri.host;

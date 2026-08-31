@@ -6,27 +6,31 @@ import '../domain/connected_router.dart';
 import '../domain/connection_failure.dart';
 import '../domain/router_capabilities.dart';
 import '../domain/router_endpoint.dart';
+import 'router_endpoint_resolver.dart';
 
 class RouterConnectionService {
   const RouterConnectionService({
     required this.transport,
     this.certificateTrust,
     this.certificateInspector = const RouterCertificateInspector(),
+    this.endpointResolver = const RouterEndpointResolver(),
   });
 
   final JsonRpcTransport transport;
   final CertificateTrust? certificateTrust;
   final RouterCertificateInspector certificateInspector;
+  final RouterEndpointResolver endpointResolver;
 
   Future<RouterCertificate?> inspectCertificate(String address) async {
-    final RouterEndpoint endpoint;
+    final RouterEndpoint requestedEndpoint;
     try {
-      endpoint = RouterEndpoint.parse(address);
+      requestedEndpoint = RouterEndpoint.parse(address);
     } on InsecureRouterEndpointException {
       throw const ConnectionFailure(ConnectionFailureKind.insecureTransport);
     } on FormatException {
       throw const ConnectionFailure(ConnectionFailureKind.invalidAddress);
     }
+    final endpoint = await endpointResolver.resolve(requestedEndpoint);
     try {
       return await certificateInspector.inspect(endpoint);
     } on JsonRpcTransportException catch (error) {
@@ -47,14 +51,15 @@ class RouterConnectionService {
     required String username,
     required String password,
   }) async {
-    final RouterEndpoint endpoint;
+    final RouterEndpoint requestedEndpoint;
     try {
-      endpoint = RouterEndpoint.parse(address);
+      requestedEndpoint = RouterEndpoint.parse(address);
     } on InsecureRouterEndpointException {
       throw const ConnectionFailure(ConnectionFailureKind.insecureTransport);
     } on FormatException {
       throw const ConnectionFailure(ConnectionFailureKind.invalidAddress);
     }
+    final endpoint = await endpointResolver.resolve(requestedEndpoint);
 
     final client = JsonRpcClient(endpoint: endpoint.uri, transport: transport);
     String? sessionToken;
@@ -178,12 +183,7 @@ class RouterConnectionService {
       session: sessionToken,
       object: 'session',
       method: 'access',
-      parameters: {
-        'ubus_rpc_session': sessionToken,
-        'scope': 'ubus',
-        'object': 'owrtpc',
-        'function': function,
-      },
+      parameters: {'scope': 'ubus', 'object': 'owrtpc', 'function': function},
     );
     return response['access'] == true;
   }
@@ -197,7 +197,6 @@ class RouterConnectionService {
         session: sessionToken,
         object: 'session',
         method: 'destroy',
-        parameters: {'ubus_rpc_session': sessionToken},
       );
     } on Object {
       // The local session is discarded regardless of router reachability.

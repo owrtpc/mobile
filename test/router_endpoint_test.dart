@@ -8,6 +8,7 @@ void main() {
 
       expect(endpoint.uri, Uri.parse('https://openwrt.lan/ubus'));
       expect(endpoint.displayAddress, 'openwrt.lan');
+      expect(endpoint.hasExplicitPort, isFalse);
     });
 
     test('preserves explicit port and formats IPv6 for display', () {
@@ -15,6 +16,7 @@ void main() {
 
       expect(endpoint.uri, Uri.parse('https://[fd00::1]:8443/ubus'));
       expect(endpoint.displayAddress, '[fd00::1]:8443');
+      expect(endpoint.hasExplicitPort, isTrue);
     });
 
     test('rejects plaintext HTTP', () {

@@ -3,6 +3,7 @@ import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/core/security/certificate_trust.dart';
 import 'package:owrtpc_mobile/core/security/router_certificate_inspector.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
+import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connection_failure.dart';
 import 'package:owrtpc_mobile/features/connection/domain/router_endpoint.dart';
 import 'package:owrtpc_mobile/features/connection/presentation/connection_controller.dart';
@@ -24,6 +25,7 @@ void main() {
         transport: const _TlsFailureTransport(),
         certificateTrust: trust,
         certificateInspector: _CertificateInspector(certificate),
+        endpointResolver: RouterEndpointResolver(probe: (_) async => true),
       ),
     );
 
