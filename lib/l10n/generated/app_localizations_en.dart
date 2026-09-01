@@ -33,6 +33,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refreshTooltip => 'Refresh profiles';
 
   @override
+  String get refreshProfilesError =>
+      'Profiles could not be refreshed. Check the router connection and try again.';
+
+  @override
   String get addProfileTooltip => 'Add profile';
 
   @override
@@ -306,6 +310,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get connectionInvalidCredentials =>
       'The username or password is incorrect.';
+
+  @override
+  String get connectionSessionExpired =>
+      'Your router session expired. Sign in again to refresh the profiles.';
 
   @override
   String get connectionPermissionDenied =>

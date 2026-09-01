@@ -78,6 +78,74 @@ void main() {
     expect(find.byType(Switch), findsNothing);
   });
 
+  testWidgets('returns to sign-in when refresh finds an expired session', (
+    tester,
+  ) async {
+    final transport = _WidgetFixtureTransport([
+      _fixture('login_success.json'),
+      _fixture('access_read.json'),
+      _fixture('access_read_only.json'),
+      _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
+      _rpcError(6),
+      _rpcError(6),
+    ]);
+    final preferences = AppPreferences(language: LanguagePreference.english);
+    await tester.pumpWidget(
+      OwrtpcApp(
+        preferences: preferences,
+        connectionService: RouterConnectionService(
+          transport: transport,
+          endpointResolver: RouterEndpointResolver(probe: (_) async => true),
+        ),
+      ),
+    );
+    await tester.enterText(
+      find.byKey(const Key('username-field')),
+      'mobile-reader',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password-field')),
+      'test-password',
+    );
+    tester.testTextInput.hide();
+    await tester.ensureVisible(find.byKey(const Key('connect-action')));
+    await tester.tap(find.byKey(const Key('connect-action')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('profiles-refresh-action')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Your router session expired. Sign in again to refresh the profiles.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('router-address-field')))
+          .controller
+          ?.text,
+      'openwrt.lan',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('username-field')))
+          .controller
+          ?.text,
+      'mobile-reader',
+    );
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('password-field')))
+          .controller
+          ?.text,
+      isEmpty,
+    );
+  });
+
   testWidgets('shows the read-only profile fixture', (tester) async {
     final preferences = AppPreferences(language: LanguagePreference.english);
     await tester.pumpWidget(
@@ -187,6 +255,12 @@ Map<String, Object?> _rpcPayload(Map<String, Object?> payload) => {
   'jsonrpc': '2.0',
   'id': 1,
   'result': [0, payload],
+};
+
+Map<String, Object?> _rpcError(int code) => {
+  'jsonrpc': '2.0',
+  'id': 1,
+  'result': [code],
 };
 
 class _WidgetFixtureTransport implements JsonRpcTransport {

@@ -10,6 +10,8 @@ enum ConnectionPhase { idle, connecting, connected, failed }
 class ConnectionController extends ChangeNotifier {
   ConnectionController({required this.service, ConnectedRouter? initialRouter})
     : router = initialRouter,
+      lastAddress = initialRouter?.endpoint.displayAddress ?? 'openwrt.lan',
+      lastUsername = initialRouter?.username ?? '',
       phase = initialRouter == null
           ? ConnectionPhase.idle
           : ConnectionPhase.connected;
@@ -19,6 +21,8 @@ class ConnectionController extends ChangeNotifier {
   ConnectedRouter? router;
   ConnectionFailureKind? failure;
   RouterCertificate? pairingCertificate;
+  String lastAddress;
+  String lastUsername;
 
   Future<void> connect({
     required String address,
@@ -26,14 +30,16 @@ class ConnectionController extends ChangeNotifier {
     required String password,
   }) async {
     if (phase == ConnectionPhase.connecting) return;
+    lastAddress = address.trim();
+    lastUsername = username.trim();
     phase = ConnectionPhase.connecting;
     failure = null;
     pairingCertificate = null;
     notifyListeners();
     try {
       router = await service.connect(
-        address: address,
-        username: username,
+        address: lastAddress,
+        username: lastUsername,
         password: password,
       );
       phase = ConnectionPhase.connected;
@@ -61,11 +67,25 @@ class ConnectionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void sessionExpired() {
+    final currentRouter = router;
+    if (currentRouter == null) return;
+    lastAddress = currentRouter.endpoint.displayAddress;
+    lastUsername = currentRouter.username;
+    router = null;
+    failure = ConnectionFailureKind.sessionExpired;
+    pairingCertificate = null;
+    phase = ConnectionPhase.failed;
+    notifyListeners();
+  }
+
   Future<void> signOut() async {
     final currentRouter = router;
     router = null;
     failure = null;
     pairingCertificate = null;
+    lastAddress = 'openwrt.lan';
+    lastUsername = '';
     phase = ConnectionPhase.idle;
     notifyListeners();
     if (currentRouter != null) await service.signOut(currentRouter);

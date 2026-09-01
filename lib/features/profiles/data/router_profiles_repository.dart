@@ -15,18 +15,25 @@ class RouterProfilesRepository implements ProfilesRepository {
       endpoint: router.endpoint.uri,
       transport: transport,
     );
-    final status = await client.call(
-      session: router.sessionToken,
-      object: 'owrtpc',
-      method: 'status',
-    );
-    final configuration = await client.call(
-      session: router.sessionToken,
-      object: 'uci',
-      method: 'get',
-      parameters: const {'config': 'owrtpc'},
-    );
-    return parseProfiles(status: status, configuration: configuration);
+    try {
+      final status = await client.call(
+        session: router.sessionToken,
+        object: 'owrtpc',
+        method: 'status',
+      );
+      final configuration = await client.call(
+        session: router.sessionToken,
+        object: 'uci',
+        method: 'get',
+        parameters: const {'config': 'owrtpc'},
+      );
+      return parseProfiles(status: status, configuration: configuration);
+    } on UbusException catch (error) {
+      if (error.code == 6 && await _sessionHasExpired(router)) {
+        throw const ProfilesSessionExpiredException();
+      }
+      rethrow;
+    }
   }
 
   static List<ProfileSummary> parseProfiles({
@@ -189,7 +196,10 @@ class RouterProfilesRepository implements ProfilesRepository {
         parameters: parameters,
       );
       if (!responseIsValid(response)) return await _recover(router);
-    } on UbusException {
+    } on UbusException catch (error) {
+      if (error.code == 6 && await _sessionHasExpired(router)) {
+        throw const ProfilesSessionExpiredException();
+      }
       throw const ProfileQuickActionException();
     } on JsonRpcTransportException {
       return _recover(router);
@@ -226,8 +236,34 @@ class RouterProfilesRepository implements ProfilesRepository {
   ) async {
     try {
       return await load(router);
+    } on ProfilesSessionExpiredException {
+      rethrow;
     } on Object {
       return null;
+    }
+  }
+
+  Future<bool> _sessionHasExpired(ConnectedRouter router) async {
+    final client = JsonRpcClient(
+      endpoint: router.endpoint.uri,
+      transport: transport,
+    );
+    try {
+      await client.call(
+        session: router.sessionToken,
+        object: 'session',
+        method: 'access',
+        parameters: const {
+          'scope': 'ubus',
+          'object': 'owrtpc',
+          'function': 'status',
+        },
+      );
+      return false;
+    } on UbusException catch (error) {
+      return error.code == 6;
+    } on Object {
+      return false;
     }
   }
 

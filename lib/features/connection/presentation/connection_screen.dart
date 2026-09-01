@@ -16,11 +16,22 @@ class ConnectionScreen extends StatefulWidget {
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _addressController = TextEditingController(text: 'openwrt.lan');
-  final _usernameController = TextEditingController();
+  late final TextEditingController _addressController;
+  late final TextEditingController _usernameController;
   final _passwordController = TextEditingController();
   bool _certificateCompared = false;
   bool _passwordObscured = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _addressController = TextEditingController(
+      text: widget.controller.lastAddress,
+    );
+    _usernameController = TextEditingController(
+      text: widget.controller.lastUsername,
+    );
+  }
 
   @override
   void dispose() {
@@ -225,6 +236,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     ConnectionFailureKind.tlsUntrusted => strings.connectionTlsUntrusted,
     ConnectionFailureKind.invalidCredentials =>
       strings.connectionInvalidCredentials,
+    ConnectionFailureKind.sessionExpired => strings.connectionSessionExpired,
     ConnectionFailureKind.permissionDenied =>
       strings.connectionPermissionDenied,
     ConnectionFailureKind.apiMissing => strings.connectionApiMissing,

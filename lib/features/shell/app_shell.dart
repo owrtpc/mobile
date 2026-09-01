@@ -12,6 +12,7 @@ class AppShell extends StatefulWidget {
     required this.preferences,
     required this.router,
     required this.profilesRepository,
+    required this.onSessionExpired,
     required this.onSignOut,
     super.key,
   });
@@ -19,6 +20,7 @@ class AppShell extends StatefulWidget {
   final AppPreferences preferences;
   final ConnectedRouter router;
   final ProfilesRepository profilesRepository;
+  final VoidCallback onSessionExpired;
   final Future<void> Function() onSignOut;
 
   @override
@@ -35,6 +37,7 @@ class _AppShellState extends State<AppShell> {
       ProfilesScreen(
         router: widget.router,
         repository: widget.profilesRepository,
+        onSessionExpired: widget.onSessionExpired,
       ),
       SettingsScreen(
         preferences: widget.preferences,

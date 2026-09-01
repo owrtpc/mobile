@@ -130,6 +130,59 @@ void main() {
     expect(repository.loadCalls, 2);
   });
 
+  testWidgets('refreshes from both the app bar and pull gesture', (
+    tester,
+  ) async {
+    final repository = _FakeProfilesRepository([_allowedProfile]);
+    await _pumpScreen(tester, repository);
+
+    repository.profiles = [_blockedProfile];
+    await tester.tap(find.byKey(const Key('profiles-refresh-action')));
+    await tester.pumpAndSettle();
+
+    expect(repository.loadCalls, 2);
+    expect(find.text('Manually blocked'), findsOneWidget);
+
+    repository.profiles = [_allowedProfile];
+    await tester.drag(find.byType(ListView), const Offset(0, 500));
+    await tester.pumpAndSettle();
+
+    expect(repository.loadCalls, 3);
+    expect(find.text('Allowed'), findsOneWidget);
+  });
+
+  testWidgets('reports a failed manual refresh instead of appearing inert', (
+    tester,
+  ) async {
+    final repository = _FakeProfilesRepository([_allowedProfile]);
+    await _pumpScreen(tester, repository);
+    repository.loadError = Exception('router unreachable');
+
+    await tester.tap(find.byKey(const Key('profiles-refresh-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('profiles-refresh-failed')), findsOneWidget);
+    expect(find.byKey(const Key('stale-profiles-notice')), findsOneWidget);
+  });
+
+  testWidgets('notifies the app flow when the router session expires', (
+    tester,
+  ) async {
+    final repository = _FakeProfilesRepository([_allowedProfile]);
+    var expirationCalls = 0;
+    await _pumpScreen(
+      tester,
+      repository,
+      onSessionExpired: () => expirationCalls++,
+    );
+    repository.loadError = const ProfilesSessionExpiredException();
+
+    await tester.tap(find.byKey(const Key('profiles-refresh-action')));
+    await tester.pumpAndSettle();
+
+    expect(expirationCalls, 1);
+  });
+
   testWidgets('shows an uncertain outcome without repeating the action', (
     tester,
   ) async {
@@ -154,13 +207,18 @@ Future<void> _pumpScreen(
   WidgetTester tester,
   ProfilesRepository repository, {
   Locale locale = const Locale('en'),
+  VoidCallback? onSessionExpired,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: ProfilesScreen(router: _writableRouter, repository: repository),
+      home: ProfilesScreen(
+        router: _writableRouter,
+        repository: repository,
+        onSessionExpired: onSessionExpired,
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -254,10 +312,13 @@ class _FakeProfilesRepository implements ProfilesRepository {
   bool? lastBlocked;
   bool? lastEnabled;
   ExtraTimeChoice? lastTimeChoice;
+  Object? loadError;
 
   @override
   Future<List<ProfileSummary>> load(ConnectedRouter router) async {
     loadCalls++;
+    final error = loadError;
+    if (error != null) throw error;
     return profiles;
   }
 

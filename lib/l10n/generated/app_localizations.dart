@@ -140,6 +140,12 @@ abstract class AppLocalizations {
   /// **'Refresh profiles'**
   String get refreshTooltip;
 
+  /// No description provided for @refreshProfilesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles could not be refreshed. Check the router connection and try again.'**
+  String get refreshProfilesError;
+
   /// No description provided for @addProfileTooltip.
   ///
   /// In en, this message translates to:
@@ -565,6 +571,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The username or password is incorrect.'**
   String get connectionInvalidCredentials;
+
+  /// No description provided for @connectionSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your router session expired. Sign in again to refresh the profiles.'**
+  String get connectionSessionExpired;
 
   /// No description provided for @connectionPermissionDenied.
   ///

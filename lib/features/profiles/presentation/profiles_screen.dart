@@ -11,11 +11,13 @@ class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
     required this.router,
     required this.repository,
+    this.onSessionExpired,
     super.key,
   });
 
   final ConnectedRouter router;
   final ProfilesRepository repository;
+  final VoidCallback? onSessionExpired;
 
   @override
   State<ProfilesScreen> createState() => _ProfilesScreenState();
@@ -30,9 +32,12 @@ class _ProfilesScreenState extends State<ProfilesScreen>
   DateTime? _lastSuccessfulRefresh;
   String? _busyProfile;
   bool _loading = true;
+  bool _refreshing = false;
   bool _connectionHealthy = false;
   bool _reloadAfterAction = false;
+  bool _reloadAfterCurrent = false;
   Timer? _freshnessTimer;
+  Future<void>? _refreshFuture;
 
   bool get _isFresh {
     final refreshed = _lastSuccessfulRefresh;
@@ -62,7 +67,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       _profiles = null;
       _lastSuccessfulRefresh = null;
       _connectionHealthy = false;
-      unawaited(_reload(showLoading: true));
+      unawaited(_reload(showLoading: true, forceAfterCurrent: true));
     }
   }
 
@@ -83,14 +88,46 @@ class _ProfilesScreenState extends State<ProfilesScreen>
     super.dispose();
   }
 
-  Future<void> _reload({bool showLoading = false}) async {
+  Future<void> _reload({
+    bool showLoading = false,
+    bool userInitiated = false,
+    bool forceAfterCurrent = false,
+  }) async {
     if (_busyProfile != null) {
       _reloadAfterAction = true;
       return;
     }
-    if (showLoading && mounted) {
+    final currentRefresh = _refreshFuture;
+    if (currentRefresh != null) {
+      if (forceAfterCurrent) _reloadAfterCurrent = true;
+      await currentRefresh;
+      return;
+    }
+
+    final refresh = _performReload(
+      showLoading: showLoading,
+      userInitiated: userInitiated,
+    );
+    _refreshFuture = refresh;
+    try {
+      await refresh;
+    } finally {
+      if (identical(_refreshFuture, refresh)) _refreshFuture = null;
+      if (_reloadAfterCurrent && mounted) {
+        _reloadAfterCurrent = false;
+        unawaited(_reload(showLoading: true));
+      }
+    }
+  }
+
+  Future<void> _performReload({
+    required bool showLoading,
+    required bool userInitiated,
+  }) async {
+    if (mounted) {
       setState(() {
-        _loading = true;
+        _refreshing = true;
+        if (showLoading) _loading = true;
         _loadError = null;
       });
     }
@@ -100,17 +137,36 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       setState(() {
         _profiles = profiles;
         _loading = false;
+        _refreshing = false;
         _loadError = null;
         _connectionHealthy = true;
         _lastSuccessfulRefresh = DateTime.now();
       });
+    } on ProfilesSessionExpiredException {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _refreshing = false;
+        _connectionHealthy = false;
+      });
+      widget.onSessionExpired?.call();
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
+        _refreshing = false;
         _loadError = error;
         _connectionHealthy = false;
       });
+      if (userInitiated && _profiles != null) {
+        final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+        messenger.showSnackBar(
+          SnackBar(
+            key: const Key('profiles-refresh-failed'),
+            content: Text(AppLocalizations.of(context).refreshProfilesError),
+          ),
+        );
+      }
     }
   }
 
@@ -131,9 +187,18 @@ class _ProfilesScreenState extends State<ProfilesScreen>
         ),
         actions: [
           IconButton(
+            key: const Key('profiles-refresh-action'),
             tooltip: strings.refreshTooltip,
-            onPressed: _busyProfile == null ? _reload : null,
-            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _busyProfile == null && !_refreshing
+                ? () => _reload(userInitiated: true)
+                : null,
+            icon: _refreshing
+                ? const SizedBox.square(
+                    key: Key('profiles-refresh-progress'),
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
@@ -180,7 +245,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
     final dataIsFresh = _connectionHealthy && _loadError == null && _isFresh;
     final actionsEnabled = dataIsFresh && _busyProfile == null;
     return RefreshIndicator(
-      onRefresh: _reload,
+      onRefresh: () => _reload(userInitiated: true),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -388,6 +453,9 @@ class _ProfilesScreenState extends State<ProfilesScreen>
           ),
         ),
       );
+    } on ProfilesSessionExpiredException {
+      if (!mounted) return;
+      widget.onSessionExpired?.call();
     } on ProfileQuickActionException {
       if (!mounted) return;
       messenger.showSnackBar(

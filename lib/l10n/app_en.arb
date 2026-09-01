@@ -10,6 +10,7 @@
     "placeholders": { "router": { "type": "String" } }
   },
   "refreshTooltip": "Refresh profiles",
+  "refreshProfilesError": "Profiles could not be refreshed. Check the router connection and try again.",
   "addProfileTooltip": "Add profile",
   "allowed": "Allowed",
   "manuallyBlocked": "Manually blocked",
@@ -144,6 +145,7 @@
   "certificateTrustAndConnect": "Trust and connect",
   "certificateExpired": "This certificate is expired or not yet valid and cannot be paired.",
   "connectionInvalidCredentials": "The username or password is incorrect.",
+  "connectionSessionExpired": "Your router session expired. Sign in again to refresh the profiles.",
   "connectionPermissionDenied": "This account does not have OWRTPC read access.",
   "connectionApiMissing": "The router does not provide the OWRTPC mobile API.",
   "connectionApiIncompatible": "This router uses an incompatible OWRTPC mobile API version.",

@@ -55,6 +55,7 @@ class _AppFlowState extends State<AppFlow> {
           profilesRepository: router.isPreview
               ? const FixtureProfilesRepository()
               : RouterProfilesRepository(transport: widget.service.transport),
+          onSessionExpired: _controller.sessionExpired,
           onSignOut: _controller.signOut,
         );
       }

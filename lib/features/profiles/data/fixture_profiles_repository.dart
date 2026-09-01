@@ -23,6 +23,10 @@ abstract interface class ProfilesRepository {
   );
 }
 
+class ProfilesSessionExpiredException implements Exception {
+  const ProfilesSessionExpiredException();
+}
+
 enum ExtraTimeChoice { oneHour, fourHours, allDay }
 
 enum ProfileQuickActionStatus { confirmed, outcomeUnknown }

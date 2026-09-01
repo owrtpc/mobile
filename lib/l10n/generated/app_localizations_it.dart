@@ -33,6 +33,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get refreshTooltip => 'Aggiorna i profili';
 
   @override
+  String get refreshProfilesError =>
+      'Non è stato possibile aggiornare i profili. Verifica la connessione al router e riprova.';
+
+  @override
   String get addProfileTooltip => 'Aggiungi profilo';
 
   @override
@@ -306,6 +310,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get connectionInvalidCredentials =>
       'Il nome utente o la password non sono corretti.';
+
+  @override
+  String get connectionSessionExpired =>
+      'La sessione del router è scaduta. Accedi di nuovo per aggiornare i profili.';
 
   @override
   String get connectionPermissionDenied =>

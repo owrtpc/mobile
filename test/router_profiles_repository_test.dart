@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:owrtpc_mobile/core/network/json_rpc_client.dart';
 import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 import 'package:owrtpc_mobile/features/profiles/data/fixture_profiles_repository.dart';
@@ -36,6 +37,31 @@ void main() {
         configuration: const {'values': <String, Object?>{}},
       ),
       throwsFormatException,
+    );
+  });
+
+  test('classifies an expired router session during refresh', () async {
+    final transport = _ScriptedTransport([_rpcError(6), _rpcError(6)]);
+    final repository = RouterProfilesRepository(transport: transport);
+
+    await expectLater(
+      repository.load(ConnectedRouter.preview()),
+      throwsA(isA<ProfilesSessionExpiredException>()),
+    );
+
+    expect(transport.methods, ['status', 'access']);
+  });
+
+  test('does not misclassify an object ACL denial as session expiry', () async {
+    final transport = _ScriptedTransport([
+      _rpcError(6),
+      _rpcPayload({'access': true}),
+    ]);
+    final repository = RouterProfilesRepository(transport: transport);
+
+    await expectLater(
+      repository.load(ConnectedRouter.preview()),
+      throwsA(isA<UbusException>().having((error) => error.code, 'code', 6)),
     );
   });
 
@@ -193,6 +219,12 @@ Map<String, Object?> _rpcPayload(Map<String, Object?> payload) => {
   'jsonrpc': '2.0',
   'id': 1,
   'result': [0, payload],
+};
+
+Map<String, Object?> _rpcError(int code) => {
+  'jsonrpc': '2.0',
+  'id': 1,
+  'result': [code],
 };
 
 class _ScriptedTransport implements JsonRpcTransport {
