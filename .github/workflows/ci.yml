@@ -12,7 +12,7 @@ jobs:
   flutter:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build pinned Flutter image
         run: docker build --platform linux/amd64 -t owrtpc-mobile-flutter:3.47.2 .
       - name: Check localization, formatting, analysis and tests
