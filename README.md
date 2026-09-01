@@ -46,7 +46,11 @@ The app accepts router hosts only over HTTPS, calls the ubus JSON-RPC bridge at
 `/ubus`, performs `session.login`, checks read and quick-action ACLs, validates
 `owrtpc.capabilities` V1 and keeps the returned session only in memory. It then
 combines live `owrtpc.status` and committed `uci get owrtpc` data into the
-profile list. Logout best-effort destroys the router session.
+profile list. Users can opt in to remembering the router login in device-bound,
+non-synchronizing iOS Keychain or Android Keystore-backed encrypted storage.
+The app then signs in automatically at launch and renews an expired in-memory
+session without replaying writes. Logout removes the remembered login and
+best-effort destroys the router session.
 
 Write-capable accounts can block or unblock a profile, enable or disable it and
 replace the temporary extra-time choice with one hour, four hours or all day.

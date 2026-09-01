@@ -21,6 +21,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   final _passwordController = TextEditingController();
   bool _certificateCompared = false;
   bool _passwordObscured = true;
+  late bool _rememberCredentials;
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     _usernameController = TextEditingController(
       text: widget.controller.lastUsername,
     );
+    _rememberCredentials = widget.controller.hasRememberedCredentials;
   }
 
   @override
@@ -95,7 +97,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         textInputAction: TextInputAction.next,
                         autocorrect: false,
                         onChanged: (_) {
-                          _certificateCompared = false;
+                          setState(() {
+                            _certificateCompared = false;
+                          });
                           widget.controller.clearPairing();
                         },
                         decoration: InputDecoration(
@@ -112,6 +116,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                         autofillHints: const [AutofillHints.username],
                         textInputAction: TextInputAction.next,
                         autocorrect: false,
+                        onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(
                           labelText: strings.usernameField,
                           prefixIcon: const Icon(Icons.person_outline_rounded),
@@ -146,7 +151,23 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                             ),
                           ),
                         ),
-                        validator: (value) => _required(strings, value),
+                        validator: (value) => _passwordRequired(strings, value),
+                      ),
+                      const SizedBox(height: 10),
+                      CheckboxListTile(
+                        key: const Key('remember-credentials'),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: _rememberCredentials,
+                        onChanged:
+                            widget.controller.phase ==
+                                ConnectionPhase.connecting
+                            ? null
+                            : (value) => setState(() {
+                                _rememberCredentials = value ?? false;
+                              }),
+                        title: Text(strings.rememberCredentials),
+                        subtitle: Text(strings.rememberCredentialsExplanation),
                       ),
                       if (widget.controller.failure case final failure?) ...[
                         const SizedBox(height: 16),
@@ -204,12 +225,24 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   String? _required(AppLocalizations strings, String? value) =>
       value == null || value.trim().isEmpty ? strings.requiredField : null;
 
+  String? _passwordRequired(AppLocalizations strings, String? value) {
+    if (value != null && value.isNotEmpty) return null;
+    if (widget.controller.canUseRememberedCredentials(
+      _addressController.text,
+      _usernameController.text,
+    )) {
+      return null;
+    }
+    return strings.requiredField;
+  }
+
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     widget.controller.connect(
       address: _addressController.text,
       username: _usernameController.text,
       password: _passwordController.text,
+      rememberCredentials: _rememberCredentials,
     );
   }
 
@@ -237,6 +270,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     ConnectionFailureKind.invalidCredentials =>
       strings.connectionInvalidCredentials,
     ConnectionFailureKind.sessionExpired => strings.connectionSessionExpired,
+    ConnectionFailureKind.secureStorageUnavailable =>
+      strings.connectionSecureStorageUnavailable,
     ConnectionFailureKind.permissionDenied =>
       strings.connectionPermissionDenied,
     ConnectionFailureKind.apiMissing => strings.connectionApiMissing,

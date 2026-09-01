@@ -7,11 +7,14 @@ import 'package:owrtpc_mobile/app/app.dart';
 import 'package:owrtpc_mobile/app/app_preferences.dart';
 import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
+import 'package:owrtpc_mobile/features/connection/data/router_credentials_store.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
+  late _MemoryCredentialsStore credentialsStore;
+
   setUpAll(() {
     PackageInfo.setMockInitialValues(
       appName: 'OWRTPC',
@@ -22,9 +25,16 @@ void main() {
     );
   });
 
+  setUp(() {
+    credentialsStore = _MemoryCredentialsStore();
+  });
+
   testWidgets('starts from the secure router connection flow', (tester) async {
     final preferences = AppPreferences(language: LanguagePreference.english);
-    await tester.pumpWidget(OwrtpcApp(preferences: preferences));
+    await tester.pumpWidget(
+      OwrtpcApp(preferences: preferences, credentialsStore: credentialsStore),
+    );
+    await tester.pumpAndSettle();
 
     expect(find.text('Connect securely'), findsOneWidget);
     expect(find.byKey(const Key('router-address-field')), findsOneWidget);
@@ -51,12 +61,14 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         connectionService: RouterConnectionService(
           transport: transport,
           endpointResolver: RouterEndpointResolver(probe: (_) async => true),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const Key('username-field')),
@@ -65,6 +77,14 @@ void main() {
     await tester.enterText(
       find.byKey(const Key('password-field')),
       'test-password',
+    );
+    expect(
+      tester
+          .widget<CheckboxListTile>(
+            find.byKey(const Key('remember-credentials')),
+          )
+          .value,
+      isFalse,
     );
     tester.testTextInput.hide();
     await tester.ensureVisible(find.byKey(const Key('connect-action')));
@@ -76,6 +96,7 @@ void main() {
     expect(find.text('Time used'), findsOneWidget);
     expect(find.text('Block'), findsNothing);
     expect(find.byType(Switch), findsNothing);
+    expect(credentialsStore.credentials, isNull);
   });
 
   testWidgets('returns to sign-in when refresh finds an expired session', (
@@ -95,12 +116,14 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         connectionService: RouterConnectionService(
           transport: transport,
           endpointResolver: RouterEndpointResolver(probe: (_) async => true),
         ),
       ),
     );
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('username-field')),
       'mobile-reader',
@@ -146,11 +169,101 @@ void main() {
     );
   });
 
+  testWidgets('restores remembered credentials without showing sign-in', (
+    tester,
+  ) async {
+    credentialsStore.credentials = const RememberedRouterCredentials(
+      address: 'openwrt.lan',
+      username: 'mobile-reader',
+      password: 'test-password',
+    );
+    final transport = _WidgetFixtureTransport([
+      _fixture('login_success.json'),
+      _fixture('access_read.json'),
+      _fixture('access_read_only.json'),
+      _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
+    ]);
+
+    await tester.pumpWidget(
+      OwrtpcApp(
+        preferences: AppPreferences(language: LanguagePreference.english),
+        credentialsStore: credentialsStore,
+        connectionService: RouterConnectionService(
+          transport: transport,
+          endpointResolver: RouterEndpointResolver(probe: (_) async => true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Connected to openwrt.lan'), findsOneWidget);
+    expect(find.text('Children'), findsOneWidget);
+    expect(find.byKey(const Key('password-field')), findsNothing);
+  });
+
+  testWidgets('renews an expired session using remembered credentials', (
+    tester,
+  ) async {
+    final transport = _WidgetFixtureTransport([
+      _fixture('login_success.json'),
+      _fixture('access_read.json'),
+      _fixture('access_read_only.json'),
+      _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
+      _rpcError(6),
+      _rpcError(6),
+      _loginWithSession('fedcba9876543210fedcba9876543210'),
+      _fixture('access_read.json'),
+      _fixture('access_read_only.json'),
+      _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
+    ]);
+    await tester.pumpWidget(
+      OwrtpcApp(
+        preferences: AppPreferences(language: LanguagePreference.english),
+        credentialsStore: credentialsStore,
+        connectionService: RouterConnectionService(
+          transport: transport,
+          endpointResolver: RouterEndpointResolver(probe: (_) async => true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('username-field')),
+      'mobile-reader',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password-field')),
+      'test-password',
+    );
+    await tester.ensureVisible(find.byKey(const Key('remember-credentials')));
+    await tester.tap(find.byKey(const Key('remember-credentials')));
+    tester.testTextInput.hide();
+    await tester.ensureVisible(find.byKey(const Key('connect-action')));
+    await tester.tap(find.byKey(const Key('connect-action')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('profiles-refresh-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Connected to openwrt.lan'), findsOneWidget);
+    expect(find.text('Children'), findsOneWidget);
+    expect(find.byKey(const Key('password-field')), findsNothing);
+    expect(credentialsStore.credentials?.password, 'test-password');
+    expect(transport.remainingResponses, 0);
+  });
+
   testWidgets('shows the read-only profile fixture', (tester) async {
     final preferences = AppPreferences(language: LanguagePreference.english);
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         initialRouter: ConnectedRouter.preview(),
       ),
     );
@@ -167,6 +280,7 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         initialRouter: ConnectedRouter.preview(),
       ),
     );
@@ -190,6 +304,7 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         initialRouter: ConnectedRouter.preview(),
       ),
     );
@@ -210,6 +325,7 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         initialRouter: ConnectedRouter.preview(),
       ),
     );
@@ -229,6 +345,7 @@ void main() {
     await tester.pumpWidget(
       OwrtpcApp(
         preferences: preferences,
+        credentialsStore: credentialsStore,
         initialRouter: ConnectedRouter.preview(),
       ),
     );
@@ -243,6 +360,56 @@ void main() {
 
     expect(find.text('Connect securely'), findsOneWidget);
     expect(find.text('Profiles'), findsNothing);
+    expect(credentialsStore.credentials, isNull);
+  });
+
+  testWidgets('sign-out removes a remembered router login', (tester) async {
+    final transport = _WidgetFixtureTransport([
+      _fixture('login_success.json'),
+      _fixture('access_read.json'),
+      _fixture('access_read_only.json'),
+      _fixture('capabilities_success.json'),
+      _rpcPayload(_fixture('status_profiles.json')),
+      _rpcPayload(_fixture('uci_profiles.json')),
+      _rpcPayload(const {}),
+    ]);
+    await tester.pumpWidget(
+      OwrtpcApp(
+        preferences: AppPreferences(language: LanguagePreference.english),
+        credentialsStore: credentialsStore,
+        connectionService: RouterConnectionService(
+          transport: transport,
+          endpointResolver: RouterEndpointResolver(probe: (_) async => true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('username-field')),
+      'mobile-reader',
+    );
+    await tester.enterText(
+      find.byKey(const Key('password-field')),
+      'test-password',
+    );
+    await tester.ensureVisible(find.byKey(const Key('remember-credentials')));
+    await tester.tap(find.byKey(const Key('remember-credentials')));
+    await tester.ensureVisible(find.byKey(const Key('connect-action')));
+    await tester.tap(find.byKey(const Key('connect-action')));
+    await tester.pumpAndSettle();
+    expect(credentialsStore.credentials, isNotNull);
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -420));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('sign-out-action')));
+    await tester.tap(find.byKey(const Key('sign-out-action')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Connect securely'), findsOneWidget);
+    expect(credentialsStore.credentials, isNull);
+    expect(transport.remainingResponses, 0);
   });
 }
 
@@ -263,10 +430,21 @@ Map<String, Object?> _rpcError(int code) => {
   'result': [code],
 };
 
+Map<String, Object?> _loginWithSession(String session) => {
+  'jsonrpc': '2.0',
+  'id': 1,
+  'result': [
+    0,
+    {'ubus_rpc_session': session},
+  ],
+};
+
 class _WidgetFixtureTransport implements JsonRpcTransport {
   _WidgetFixtureTransport(this._responses);
 
   final List<Map<String, Object?>> _responses;
+
+  int get remainingResponses => _responses.length;
 
   @override
   Future<Map<String, Object?>> post(
@@ -276,4 +454,18 @@ class _WidgetFixtureTransport implements JsonRpcTransport {
     final response = _responses.removeAt(0);
     return {...response, 'id': body['id']};
   }
+}
+
+class _MemoryCredentialsStore implements RouterCredentialsStore {
+  RememberedRouterCredentials? credentials;
+
+  @override
+  Future<void> clear() async => credentials = null;
+
+  @override
+  Future<RememberedRouterCredentials?> read() async => credentials;
+
+  @override
+  Future<void> write(RememberedRouterCredentials value) async =>
+      credentials = value;
 }

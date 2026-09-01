@@ -6,6 +6,7 @@ enum ConnectionFailureKind {
   tlsUntrusted,
   invalidCredentials,
   sessionExpired,
+  secureStorageUnavailable,
   permissionDenied,
   apiMissing,
   apiIncompatible,

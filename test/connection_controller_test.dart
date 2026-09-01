@@ -3,6 +3,7 @@ import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/core/security/certificate_trust.dart';
 import 'package:owrtpc_mobile/core/security/router_certificate_inspector.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_connection_service.dart';
+import 'package:owrtpc_mobile/features/connection/data/router_credentials_store.dart';
 import 'package:owrtpc_mobile/features/connection/data/router_endpoint_resolver.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connection_failure.dart';
 import 'package:owrtpc_mobile/features/connection/domain/router_endpoint.dart';
@@ -27,12 +28,14 @@ void main() {
         certificateInspector: _CertificateInspector(certificate),
         endpointResolver: RouterEndpointResolver(probe: (_) async => true),
       ),
+      credentialsStore: _MemoryCredentialsStore(),
     );
 
     await controller.connect(
       address: 'openwrt.lan',
       username: 'reader',
       password: 'secret',
+      rememberCredentials: false,
     );
 
     expect(controller.phase, ConnectionPhase.failed);
@@ -44,6 +47,20 @@ void main() {
 
     expect(trust.isPinned(certificate), isTrue);
   });
+}
+
+class _MemoryCredentialsStore implements RouterCredentialsStore {
+  RememberedRouterCredentials? credentials;
+
+  @override
+  Future<void> clear() async => credentials = null;
+
+  @override
+  Future<RememberedRouterCredentials?> read() async => credentials;
+
+  @override
+  Future<void> write(RememberedRouterCredentials value) async =>
+      credentials = value;
 }
 
 class _TlsFailureTransport implements JsonRpcTransport {

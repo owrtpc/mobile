@@ -254,6 +254,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get hidePasswordAction => 'Nascondi password';
 
   @override
+  String get rememberCredentials => 'Ricordami su questo dispositivo';
+
+  @override
+  String get rememberCredentialsExplanation =>
+      'Riconnessione automatica tramite archivio cifrato e legato al dispositivo.';
+
+  @override
   String get connectAction => 'Connetti in modo sicuro';
 
   @override
@@ -314,6 +321,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get connectionSessionExpired =>
       'La sessione del router è scaduta. Accedi di nuovo per aggiornare i profili.';
+
+  @override
+  String get connectionSecureStorageUnavailable =>
+      'L’archivio sicuro delle credenziali non è disponibile. Disattiva Ricordami su questo dispositivo e riprova.';
 
   @override
   String get connectionPermissionDenied =>

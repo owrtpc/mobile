@@ -20,7 +20,7 @@ class AppShell extends StatefulWidget {
   final AppPreferences preferences;
   final ConnectedRouter router;
   final ProfilesRepository profilesRepository;
-  final VoidCallback onSessionExpired;
+  final Future<void> Function() onSessionExpired;
   final Future<void> Function() onSignOut;
 
   @override

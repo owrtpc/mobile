@@ -254,6 +254,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hidePasswordAction => 'Hide password';
 
   @override
+  String get rememberCredentials => 'Remember on this device';
+
+  @override
+  String get rememberCredentialsExplanation =>
+      'Reconnect automatically using encrypted, device-bound storage.';
+
+  @override
   String get connectAction => 'Connect securely';
 
   @override
@@ -314,6 +321,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get connectionSessionExpired =>
       'Your router session expired. Sign in again to refresh the profiles.';
+
+  @override
+  String get connectionSecureStorageUnavailable =>
+      'Secure credential storage is unavailable. Turn off Remember on this device and try again.';
 
   @override
   String get connectionPermissionDenied =>

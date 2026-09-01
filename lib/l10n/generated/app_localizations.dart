@@ -476,6 +476,18 @@ abstract class AppLocalizations {
   /// **'Hide password'**
   String get hidePasswordAction;
 
+  /// No description provided for @rememberCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember on this device'**
+  String get rememberCredentials;
+
+  /// No description provided for @rememberCredentialsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect automatically using encrypted, device-bound storage.'**
+  String get rememberCredentialsExplanation;
+
   /// No description provided for @connectAction.
   ///
   /// In en, this message translates to:
@@ -577,6 +589,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your router session expired. Sign in again to refresh the profiles.'**
   String get connectionSessionExpired;
+
+  /// No description provided for @connectionSecureStorageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure credential storage is unavailable. Turn off Remember on this device and try again.'**
+  String get connectionSecureStorageUnavailable;
 
   /// No description provided for @connectionPermissionDenied.
   ///

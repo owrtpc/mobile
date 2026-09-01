@@ -173,13 +173,37 @@ void main() {
     await _pumpScreen(
       tester,
       repository,
-      onSessionExpired: () => expirationCalls++,
+      onSessionExpired: () async {
+        expirationCalls++;
+      },
     );
     repository.loadError = const ProfilesSessionExpiredException();
 
     await tester.tap(find.byKey(const Key('profiles-refresh-action')));
     await tester.pumpAndSettle();
 
+    expect(expirationCalls, 1);
+  });
+
+  testWidgets('renews after an expired write without replaying the action', (
+    tester,
+  ) async {
+    final repository = _FakeProfilesRepository([_blockedProfile])
+      ..blockError = const ProfilesSessionExpiredException();
+    var expirationCalls = 0;
+    await _pumpScreen(
+      tester,
+      repository,
+      onSessionExpired: () async {
+        expirationCalls++;
+      },
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('block-action-children')));
+    await tester.tap(find.byKey(const Key('block-action-children')));
+    await tester.pumpAndSettle();
+
+    expect(repository.blockCalls, 1);
     expect(expirationCalls, 1);
   });
 
@@ -207,7 +231,7 @@ Future<void> _pumpScreen(
   WidgetTester tester,
   ProfilesRepository repository, {
   Locale locale = const Locale('en'),
-  VoidCallback? onSessionExpired,
+  Future<void> Function()? onSessionExpired,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -313,6 +337,7 @@ class _FakeProfilesRepository implements ProfilesRepository {
   bool? lastEnabled;
   ExtraTimeChoice? lastTimeChoice;
   Object? loadError;
+  Object? blockError;
 
   @override
   Future<List<ProfileSummary>> load(ConnectedRouter router) async {
@@ -330,6 +355,8 @@ class _FakeProfilesRepository implements ProfilesRepository {
   }) async {
     blockCalls++;
     lastBlocked = blocked;
+    final error = blockError;
+    if (error != null) throw error;
     return blockResult!;
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/network/json_rpc_transport.dart';
 import '../core/security/certificate_trust.dart';
 import '../features/connection/data/router_connection_service.dart';
+import '../features/connection/data/router_credentials_store.dart';
 import '../features/connection/domain/connected_router.dart';
 import '../features/connection/presentation/app_flow.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -14,6 +15,7 @@ class OwrtpcApp extends StatefulWidget {
     required this.preferences,
     this.connectionService,
     this.certificateTrust,
+    this.credentialsStore,
     this.initialRouter,
     super.key,
   });
@@ -21,6 +23,7 @@ class OwrtpcApp extends StatefulWidget {
   final AppPreferences preferences;
   final RouterConnectionService? connectionService;
   final CertificateTrust? certificateTrust;
+  final RouterCredentialsStore? credentialsStore;
   final ConnectedRouter? initialRouter;
 
   @override
@@ -30,10 +33,13 @@ class OwrtpcApp extends StatefulWidget {
 class _OwrtpcAppState extends State<OwrtpcApp> {
   HttpJsonRpcTransport? _ownedTransport;
   late final RouterConnectionService _connectionService;
+  late final RouterCredentialsStore _credentialsStore;
 
   @override
   void initState() {
     super.initState();
+    _credentialsStore =
+        widget.credentialsStore ?? const SecureRouterCredentialsStore();
     final suppliedService = widget.connectionService;
     if (suppliedService != null) {
       _connectionService = suppliedService;
@@ -70,6 +76,7 @@ class _OwrtpcAppState extends State<OwrtpcApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: AppFlow(
         service: _connectionService,
+        credentialsStore: _credentialsStore,
         preferences: widget.preferences,
         initialRouter: widget.initialRouter,
       ),

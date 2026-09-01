@@ -17,7 +17,7 @@ class ProfilesScreen extends StatefulWidget {
 
   final ConnectedRouter router;
   final ProfilesRepository repository;
-  final VoidCallback? onSessionExpired;
+  final Future<void> Function()? onSessionExpired;
 
   @override
   State<ProfilesScreen> createState() => _ProfilesScreenState();
@@ -149,7 +149,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
         _refreshing = false;
         _connectionHealthy = false;
       });
-      widget.onSessionExpired?.call();
+      await widget.onSessionExpired?.call();
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
@@ -455,7 +455,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       );
     } on ProfilesSessionExpiredException {
       if (!mounted) return;
-      widget.onSessionExpired?.call();
+      await widget.onSessionExpired?.call();
     } on ProfileQuickActionException {
       if (!mounted) return;
       messenger.showSnackBar(

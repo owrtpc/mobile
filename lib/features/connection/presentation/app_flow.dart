@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../app/app_preferences.dart';
@@ -5,6 +7,7 @@ import '../../shell/app_shell.dart';
 import '../../profiles/data/fixture_profiles_repository.dart';
 import '../../profiles/data/router_profiles_repository.dart';
 import '../data/router_connection_service.dart';
+import '../data/router_credentials_store.dart';
 import '../domain/connected_router.dart';
 import 'connection_controller.dart';
 import 'connection_screen.dart';
@@ -13,12 +16,14 @@ class AppFlow extends StatefulWidget {
   const AppFlow({
     required this.service,
     required this.preferences,
+    required this.credentialsStore,
     this.initialRouter,
     super.key,
   });
 
   final RouterConnectionService service;
   final AppPreferences preferences;
+  final RouterCredentialsStore credentialsStore;
   final ConnectedRouter? initialRouter;
 
   @override
@@ -33,8 +38,10 @@ class _AppFlowState extends State<AppFlow> {
     super.initState();
     _controller = ConnectionController(
       service: widget.service,
+      credentialsStore: widget.credentialsStore,
       initialRouter: widget.initialRouter,
     );
+    unawaited(_controller.restoreRememberedConnection());
   }
 
   @override
@@ -55,9 +62,12 @@ class _AppFlowState extends State<AppFlow> {
           profilesRepository: router.isPreview
               ? const FixtureProfilesRepository()
               : RouterProfilesRepository(transport: widget.service.transport),
-          onSessionExpired: _controller.sessionExpired,
+          onSessionExpired: _controller.recoverExpiredSession,
           onSignOut: _controller.signOut,
         );
+      }
+      if (_controller.phase == ConnectionPhase.restoring) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
       return ConnectionScreen(controller: _controller);
     },
