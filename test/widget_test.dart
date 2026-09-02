@@ -109,8 +109,8 @@ void main() {
       _fixture('capabilities_success.json'),
       _rpcPayload(_fixture('status_profiles.json')),
       _rpcPayload(_fixture('uci_profiles.json')),
-      _rpcError(6),
-      _rpcError(6),
+      _jsonRpcAccessDenied(),
+      _jsonRpcAccessDenied(),
     ]);
     final preferences = AppPreferences(language: LanguagePreference.english);
     await tester.pumpWidget(
@@ -213,8 +213,8 @@ void main() {
       _fixture('capabilities_success.json'),
       _rpcPayload(_fixture('status_profiles.json')),
       _rpcPayload(_fixture('uci_profiles.json')),
-      _rpcError(6),
-      _rpcError(6),
+      _jsonRpcAccessDenied(),
+      _jsonRpcAccessDenied(),
       _loginWithSession('fedcba9876543210fedcba9876543210'),
       _fixture('access_read.json'),
       _fixture('access_read_only.json'),
@@ -424,10 +424,10 @@ Map<String, Object?> _rpcPayload(Map<String, Object?> payload) => {
   'result': [0, payload],
 };
 
-Map<String, Object?> _rpcError(int code) => {
+Map<String, Object?> _jsonRpcAccessDenied() => {
   'jsonrpc': '2.0',
   'id': 1,
-  'result': [code],
+  'error': {'code': -32002, 'message': 'Access denied'},
 };
 
 Map<String, Object?> _loginWithSession(String session) => {

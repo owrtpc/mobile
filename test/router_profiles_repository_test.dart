@@ -41,7 +41,10 @@ void main() {
   });
 
   test('classifies an expired router session during refresh', () async {
-    final transport = _ScriptedTransport([_rpcError(6), _rpcError(6)]);
+    final transport = _ScriptedTransport([
+      _jsonRpcAccessDenied(),
+      _jsonRpcAccessDenied(),
+    ]);
     final repository = RouterProfilesRepository(transport: transport);
 
     await expectLater(
@@ -225,6 +228,12 @@ Map<String, Object?> _rpcError(int code) => {
   'jsonrpc': '2.0',
   'id': 1,
   'result': [code],
+};
+
+Map<String, Object?> _jsonRpcAccessDenied() => {
+  'jsonrpc': '2.0',
+  'id': 1,
+  'error': {'code': -32002, 'message': 'Access denied'},
 };
 
 class _ScriptedTransport implements JsonRpcTransport {

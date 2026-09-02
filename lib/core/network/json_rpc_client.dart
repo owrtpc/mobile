@@ -20,6 +20,8 @@ class JsonRpcClient {
   }) : _random = random ?? Random.secure();
 
   static const anonymousSession = '00000000000000000000000000000000';
+  static const _jsonRpcAccessDenied = -32002;
+  static const _ubusPermissionDenied = 6;
 
   final Uri endpoint;
   final JsonRpcTransport transport;
@@ -39,9 +41,15 @@ class JsonRpcClient {
       'params': [session, object, method, parameters],
     });
 
-    if (response['jsonrpc'] != '2.0' ||
-        response['id'] != requestId ||
-        response['error'] != null) {
+    if (response['jsonrpc'] != '2.0' || response['id'] != requestId) {
+      throw const JsonRpcProtocolException();
+    }
+    if (response['error'] case final Map<String, Object?> error) {
+      if (error['code'] == _jsonRpcAccessDenied) {
+        throw const UbusException(_ubusPermissionDenied);
+      }
+      throw const JsonRpcProtocolException();
+    } else if (response['error'] != null) {
       throw const JsonRpcProtocolException();
     }
     final result = response['result'];
