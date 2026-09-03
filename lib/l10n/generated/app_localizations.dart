@@ -404,6 +404,120 @@ abstract class AppLocalizations {
   /// **'No parental-control profiles are configured on this router.'**
   String get noProfiles;
 
+  /// No description provided for @refreshProfileDetailsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh profile details'**
+  String get refreshProfileDetailsTooltip;
+
+  /// No description provided for @loadingProfileDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading profile details…'**
+  String get loadingProfileDetails;
+
+  /// No description provided for @loadProfileDetailsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details could not be loaded from the router.'**
+  String get loadProfileDetailsError;
+
+  /// No description provided for @profileDetailsRefreshError.
+  ///
+  /// In en, this message translates to:
+  /// **'These details could not be refreshed. The previously loaded data is shown.'**
+  String get profileDetailsRefreshError;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @associatedDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated devices'**
+  String get associatedDevices;
+
+  /// No description provided for @noAssociatedDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices are associated with this profile.'**
+  String get noAssociatedDevices;
+
+  /// No description provided for @unnamedDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed device'**
+  String get unnamedDevice;
+
+  /// No description provided for @usageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get usageUnavailable;
+
+  /// No description provided for @usedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'used today'**
+  String get usedToday;
+
+  /// No description provided for @profileSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get profileSchedule;
+
+  /// No description provided for @allowanceMondayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance · Mon–Thu'**
+  String get allowanceMondayThursday;
+
+  /// No description provided for @allowanceFridaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance · Fri–Sun'**
+  String get allowanceFridaySunday;
+
+  /// No description provided for @bedtimeSundayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime · Sun–Thu'**
+  String get bedtimeSundayThursday;
+
+  /// No description provided for @bedtimeFridaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime · Fri–Sat'**
+  String get bedtimeFridaySaturday;
+
+  /// No description provided for @unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get unlimited;
+
+  /// No description provided for @notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get notConfigured;
+
+  /// No description provided for @activityThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity threshold'**
+  String get activityThreshold;
+
+  /// No description provided for @activityThresholdBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} bytes'**
+  String activityThresholdBytes(int bytes);
+
   /// No description provided for @durationHoursMinutes.
   ///
   /// In en, this message translates to:

@@ -5,18 +5,22 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
+import '../data/profile_details_repository.dart';
 import '../domain/profile_summary.dart';
+import 'profile_details_screen.dart';
 
 class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
     required this.router,
     required this.repository,
+    required this.detailsRepository,
     this.onSessionExpired,
     super.key,
   });
 
   final ConnectedRouter router;
   final ProfilesRepository repository;
+  final ProfileDetailsRepository detailsRepository;
   final Future<void> Function()? onSessionExpired;
 
   @override
@@ -273,6 +277,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
               showWriteControls: _supportsWrites,
               actionsEnabled: actionsEnabled,
               busy: _busyProfile == profile.section,
+              onOpen: () => _openDetails(profile),
               onBlockedChanged: () => _changeBlocked(profile),
               onEnabledChanged: (enabled) => _changeEnabled(profile, enabled),
               onAddTime: () => _chooseExtraTime(profile),
@@ -280,6 +285,19 @@ class _ProfilesScreenState extends State<ProfilesScreen>
             const SizedBox(height: 12),
           ],
         ],
+      ),
+    );
+  }
+
+  Future<void> _openDetails(ProfileSummary profile) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ProfileDetailsScreen(
+          profile: profile,
+          repository: widget.detailsRepository,
+          routerProvider: () => widget.router,
+          onSessionExpired: widget.onSessionExpired,
+        ),
       ),
     );
   }
@@ -515,6 +533,7 @@ class _ProfileCard extends StatelessWidget {
     required this.showWriteControls,
     required this.actionsEnabled,
     required this.busy,
+    required this.onOpen,
     required this.onBlockedChanged,
     required this.onEnabledChanged,
     required this.onAddTime,
@@ -524,6 +543,7 @@ class _ProfileCard extends StatelessWidget {
   final bool showWriteControls;
   final bool actionsEnabled;
   final bool busy;
+  final VoidCallback onOpen;
   final VoidCallback onBlockedChanged;
   final ValueChanged<bool> onEnabledChanged;
   final VoidCallback onAddTime;
@@ -558,154 +578,161 @@ class _ProfileCard extends StatelessWidget {
       _ => null,
     };
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  foregroundColor: scheme.onPrimaryContainer,
-                  child: Text(profileName.characters.first),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    profileName,
-                    style: Theme.of(context).textTheme.titleLarge,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: Key('open-profile-${profile.section}'),
+        onTap: onOpen,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                    child: Text(profileName.characters.first),
                   ),
-                ),
-                if (showWriteControls)
-                  Semantics(
-                    key: Key('enabled-semantics-${profile.section}'),
-                    label: profile.enabled
-                        ? strings.disableProfileA11y(profileName)
-                        : strings.enableProfileA11y(profileName),
-                    toggled: profile.enabled,
-                    enabled: actionsEnabled && !busy,
-                    onTap: actionsEnabled && !busy
-                        ? () => onEnabledChanged(!profile.enabled)
-                        : null,
-                    child: ExcludeSemantics(
-                      child: Switch(
-                        key: Key('enabled-switch-${profile.section}'),
-                        value: profile.enabled,
-                        onChanged: actionsEnabled && !busy
-                            ? onEnabledChanged
-                            : null,
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      profileName,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-              ],
-            ),
-            if (busy) ...[
-              const SizedBox(height: 10),
-              Semantics(
-                label: strings.profileActionInProgress(profileName),
-                child: const LinearProgressIndicator(),
+                  if (showWriteControls)
+                    Semantics(
+                      key: Key('enabled-semantics-${profile.section}'),
+                      label: profile.enabled
+                          ? strings.disableProfileA11y(profileName)
+                          : strings.enableProfileA11y(profileName),
+                      toggled: profile.enabled,
+                      enabled: actionsEnabled && !busy,
+                      onTap: actionsEnabled && !busy
+                          ? () => onEnabledChanged(!profile.enabled)
+                          : null,
+                      child: ExcludeSemantics(
+                        child: Switch(
+                          key: Key('enabled-switch-${profile.section}'),
+                          value: profile.enabled,
+                          onChanged: actionsEnabled && !busy
+                              ? onEnabledChanged
+                              : null,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(stateIcon, size: 20, color: stateColor),
-                const SizedBox(width: 8),
-                Text(
-                  stateLabel,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: stateColor,
-                    fontWeight: FontWeight.w700,
-                  ),
+              if (busy) ...[
+                const SizedBox(height: 10),
+                Semantics(
+                  label: strings.profileActionInProgress(profileName),
+                  child: const LinearProgressIndicator(),
                 ),
               ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              strings.usedOfAllowance(
-                _duration(strings, profile.usedSeconds),
-                profile.allowanceSeconds == 0
-                    ? strings.unlimitedToday
-                    : _duration(strings, profile.allowanceSeconds),
-              ),
-            ),
-            if (profile.progress case final progress?) ...[
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress,
-                minHeight: 8,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    profile.remainingSeconds == null
-                        ? strings.unlimitedToday
-                        : strings.remaining(
-                            _duration(strings, profile.remainingSeconds!),
-                          ),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-                Text(strings.deviceCount(profile.deviceCount)),
-              ],
-            ),
-            if (showWriteControls && profile.enabled) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      key: Key('block-action-${profile.section}'),
-                      onPressed: actionsEnabled && !busy
-                          ? onBlockedChanged
-                          : null,
-                      icon: Icon(
-                        blocked ? Icons.lock_open_rounded : Icons.block_rounded,
-                      ),
-                      label: Text(blocked ? strings.unblock : strings.block),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton.tonalIcon(
-                      key: Key('add-time-${profile.section}'),
-                      onPressed: actionsEnabled && !busy && profile.canAddTime
-                          ? onAddTime
-                          : null,
-                      icon: const Icon(Icons.more_time_rounded),
-                      label: Text(strings.addTime),
+                  Icon(stateIcon, size: 20, color: stateColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    stateLabel,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: stateColor,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
               ),
-              if (addTimeUnavailableMessage != null) ...[
+              const SizedBox(height: 14),
+              Text(
+                strings.usedOfAllowance(
+                  _duration(strings, profile.usedSeconds),
+                  profile.allowanceSeconds == 0
+                      ? strings.unlimitedToday
+                      : _duration(strings, profile.allowanceSeconds),
+                ),
+              ),
+              if (profile.progress case final progress?) ...[
                 const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.more_time_rounded,
-                      size: 16,
-                      color: scheme.onSurfaceVariant,
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      profile.remainingSeconds == null
+                          ? strings.unlimitedToday
+                          : strings.remaining(
+                              _duration(strings, profile.remainingSeconds!),
+                            ),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(width: 6),
+                  ),
+                  Text(strings.deviceCount(profile.deviceCount)),
+                ],
+              ),
+              if (showWriteControls && profile.enabled) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
                     Expanded(
-                      child: Text(
-                        addTimeUnavailableMessage,
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      child: OutlinedButton.icon(
+                        key: Key('block-action-${profile.section}'),
+                        onPressed: actionsEnabled && !busy
+                            ? onBlockedChanged
+                            : null,
+                        icon: Icon(
+                          blocked
+                              ? Icons.lock_open_rounded
+                              : Icons.block_rounded,
+                        ),
+                        label: Text(blocked ? strings.unblock : strings.block),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        key: Key('add-time-${profile.section}'),
+                        onPressed: actionsEnabled && !busy && profile.canAddTime
+                            ? onAddTime
+                            : null,
+                        icon: const Icon(Icons.more_time_rounded),
+                        label: Text(strings.addTime),
                       ),
                     ),
                   ],
                 ),
+                if (addTimeUnavailableMessage != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.more_time_rounded,
+                        size: 16,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          addTimeUnavailableMessage,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:owrtpc_mobile/core/network/json_rpc_transport.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 import 'package:owrtpc_mobile/features/profiles/data/fixture_profiles_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/data/router_profiles_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/data/router_profile_details_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_summary.dart';
 
 void main() {
@@ -37,6 +38,85 @@ void main() {
         configuration: const {'values': <String, Object?>{}},
       ),
       throwsFormatException,
+    );
+  });
+
+  test('combines device usage, discovery, aliases and profile schedules', () {
+    final status = _fixture('status_profiles.json');
+    final configuration = _fixture('uci_profiles.json');
+    final summary = RouterProfilesRepository.parseProfiles(
+      status: status,
+      configuration: configuration,
+    ).single;
+
+    final details = RouterProfileDetailsRepository.parseDetails(
+      section: 'children',
+      summary: summary,
+      status: status,
+      configuration: configuration,
+      hostHints: const {
+        'AA:BB:CC:DD:EE:FF': {
+          'name': 'tablet-hint.lan',
+          'ipaddrs': ['192.168.8.40'],
+        },
+      },
+      leases: const {
+        'dhcp_leases': [
+          {
+            'macaddr': 'aa:bb:cc:dd:ee:ff',
+            'hostname': 'tablet-lease',
+            'ipaddr': '192.168.8.40',
+          },
+        ],
+      },
+      aliases: const {
+        'values': {
+          'client_1': {
+            '.type': 'client',
+            'mac': 'aa:bb:cc:dd:ee:ff',
+            'alias': 'Tablet Elena',
+          },
+        },
+      },
+    );
+
+    expect(details.devices, hasLength(2));
+    expect(details.devices.first.name, 'Tablet Elena');
+    expect(details.devices.first.addresses, ['192.168.8.40']);
+    expect(details.devices.first.usedSeconds, 3000);
+    expect(details.devices.last.name, isNull);
+    expect(details.devices.last.usedSeconds, 1800);
+    expect(details.monThuDailyMinutes, 120);
+    expect(details.friSunDailyMinutes, 240);
+    expect(details.sunThuBedtime.start, '21:30');
+    expect(details.sunThuBedtime.end, '07:00');
+    expect(details.friSatBedtime.start, '23:00');
+    expect(details.friSatBedtime.end, '09:00');
+    expect(details.activityThresholdBytes, 131072);
+  });
+
+  test('keeps configured devices when an older backend has no usage data', () {
+    final status = _fixture('status_profiles.json');
+    final rawProfile =
+        (status['profiles']! as List<Object?>).single! as Map<String, Object?>;
+    rawProfile.remove('devices');
+    final configuration = _fixture('uci_profiles.json');
+    final summary = RouterProfilesRepository.parseProfiles(
+      status: status,
+      configuration: configuration,
+    ).single;
+
+    final details = RouterProfileDetailsRepository.parseDetails(
+      section: 'children',
+      summary: summary,
+      status: status,
+      configuration: configuration,
+    );
+
+    expect(details.devices, hasLength(2));
+    expect(
+      details.devices.every((device) => device.usedSeconds == null),
+      isTrue,
     );
   });
 

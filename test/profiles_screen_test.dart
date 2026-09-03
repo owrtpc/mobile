@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 import 'package:owrtpc_mobile/features/profiles/data/fixture_profiles_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/data/profile_details_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_summary.dart';
 import 'package:owrtpc_mobile/features/profiles/presentation/profiles_screen.dart';
 import 'package:owrtpc_mobile/l10n/generated/app_localizations.dart';
@@ -130,6 +131,18 @@ void main() {
     expect(repository.loadCalls, 2);
   });
 
+  testWidgets('opens profile details when the card is tapped', (tester) async {
+    final repository = _FakeProfilesRepository([_allowedProfile]);
+    await _pumpScreen(tester, repository);
+
+    await tester.tap(find.byKey(const Key('open-profile-children')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Associated devices'), findsOneWidget);
+    expect(find.text('Tablet'), findsOneWidget);
+    expect(find.byKey(const Key('profile-details-refresh')), findsOneWidget);
+  });
+
   testWidgets('refreshes from both the app bar and pull gesture', (
     tester,
   ) async {
@@ -241,6 +254,7 @@ Future<void> _pumpScreen(
       home: ProfilesScreen(
         router: _writableRouter,
         repository: repository,
+        detailsRepository: const FixtureProfileDetailsRepository(),
         onSessionExpired: onSessionExpired,
       ),
     ),

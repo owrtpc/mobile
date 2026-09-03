@@ -12,6 +12,13 @@
       ".name": "children",
       "name": "Children",
       "enabled": "1",
+      "mon_thu_daily_minutes": "120",
+      "fri_sun_daily_minutes": "240",
+      "sun_thu_bedtime_start": "21:30",
+      "sun_thu_bedtime_end": "07:00",
+      "fri_sat_bedtime_start": "23:00",
+      "fri_sat_bedtime_end": "09:00",
+      "activity_threshold_bytes": "131072",
       "device": [
         "AA:BB:CC:DD:EE:FF",
         "11:22:33:44:55:66"

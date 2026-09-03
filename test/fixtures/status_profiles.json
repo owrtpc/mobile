@@ -14,7 +14,11 @@
       "bedtime_period": "sun_thu",
       "bonus_seconds": 0,
       "all_day": false,
-      "blocked": true
+      "blocked": true,
+      "devices": [
+        {"mac": "AA:BB:CC:DD:EE:FF", "used_seconds": 3000},
+        {"mac": "11:22:33:44:55:66", "used_seconds": 1800}
+      ]
     }
   ]
 }

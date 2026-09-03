@@ -48,8 +48,7 @@ class ProfileQuickActionException implements Exception {
 class FixtureProfilesRepository implements ProfilesRepository {
   const FixtureProfilesRepository();
 
-  @override
-  Future<List<ProfileSummary>> load(ConnectedRouter router) async => const [
+  List<ProfileSummary> get profiles => const [
     ProfileSummary(
       section: 'family',
       name: 'Family',
@@ -75,6 +74,9 @@ class FixtureProfilesRepository implements ProfilesRepository {
       allDay: false,
     ),
   ];
+
+  @override
+  Future<List<ProfileSummary>> load(ConnectedRouter router) async => profiles;
 
   @override
   Future<ProfileQuickActionResult> addTime(

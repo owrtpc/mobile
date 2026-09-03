@@ -211,6 +211,68 @@ class AppLocalizationsEn extends AppLocalizations {
       'No parental-control profiles are configured on this router.';
 
   @override
+  String get refreshProfileDetailsTooltip => 'Refresh profile details';
+
+  @override
+  String get loadingProfileDetails => 'Loading profile details…';
+
+  @override
+  String get loadProfileDetailsError =>
+      'Profile details could not be loaded from the router.';
+
+  @override
+  String get profileDetailsRefreshError =>
+      'These details could not be refreshed. The previously loaded data is shown.';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get associatedDevices => 'Associated devices';
+
+  @override
+  String get noAssociatedDevices =>
+      'No devices are associated with this profile.';
+
+  @override
+  String get unnamedDevice => 'Unnamed device';
+
+  @override
+  String get usageUnavailable => 'Unavailable';
+
+  @override
+  String get usedToday => 'used today';
+
+  @override
+  String get profileSchedule => 'Schedule';
+
+  @override
+  String get allowanceMondayThursday => 'Daily allowance · Mon–Thu';
+
+  @override
+  String get allowanceFridaySunday => 'Daily allowance · Fri–Sun';
+
+  @override
+  String get bedtimeSundayThursday => 'Bedtime · Sun–Thu';
+
+  @override
+  String get bedtimeFridaySaturday => 'Bedtime · Fri–Sat';
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get notConfigured => 'Not configured';
+
+  @override
+  String get activityThreshold => 'Activity threshold';
+
+  @override
+  String activityThresholdBytes(int bytes) {
+    return '$bytes bytes';
+  }
+
+  @override
   String durationHoursMinutes(int hours, int minutes) {
     return '${hours}h ${minutes}m';
   }

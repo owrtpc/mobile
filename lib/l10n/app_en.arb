@@ -102,6 +102,28 @@
   "loadProfilesError": "Profiles could not be loaded from the router.",
   "retryAction": "Try again",
   "noProfiles": "No parental-control profiles are configured on this router.",
+  "refreshProfileDetailsTooltip": "Refresh profile details",
+  "loadingProfileDetails": "Loading profile details…",
+  "loadProfileDetailsError": "Profile details could not be loaded from the router.",
+  "profileDetailsRefreshError": "These details could not be refreshed. The previously loaded data is shown.",
+  "today": "Today",
+  "associatedDevices": "Associated devices",
+  "noAssociatedDevices": "No devices are associated with this profile.",
+  "unnamedDevice": "Unnamed device",
+  "usageUnavailable": "Unavailable",
+  "usedToday": "used today",
+  "profileSchedule": "Schedule",
+  "allowanceMondayThursday": "Daily allowance · Mon–Thu",
+  "allowanceFridaySunday": "Daily allowance · Fri–Sun",
+  "bedtimeSundayThursday": "Bedtime · Sun–Thu",
+  "bedtimeFridaySaturday": "Bedtime · Fri–Sat",
+  "unlimited": "Unlimited",
+  "notConfigured": "Not configured",
+  "activityThreshold": "Activity threshold",
+  "activityThresholdBytes": "{bytes} bytes",
+  "@activityThresholdBytes": {
+    "placeholders": { "bytes": { "type": "int" } }
+  },
   "durationHoursMinutes": "{hours}h {minutes}m",
   "@durationHoursMinutes": {
     "placeholders": {

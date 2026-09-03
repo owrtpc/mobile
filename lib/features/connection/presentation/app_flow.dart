@@ -6,6 +6,8 @@ import '../../../app/app_preferences.dart';
 import '../../shell/app_shell.dart';
 import '../../profiles/data/fixture_profiles_repository.dart';
 import '../../profiles/data/router_profiles_repository.dart';
+import '../../profiles/data/profile_details_repository.dart';
+import '../../profiles/data/router_profile_details_repository.dart';
 import '../data/router_connection_service.dart';
 import '../data/router_credentials_store.dart';
 import '../domain/connected_router.dart';
@@ -62,6 +64,11 @@ class _AppFlowState extends State<AppFlow> {
           profilesRepository: router.isPreview
               ? const FixtureProfilesRepository()
               : RouterProfilesRepository(transport: widget.service.transport),
+          profileDetailsRepository: router.isPreview
+              ? const FixtureProfileDetailsRepository()
+              : RouterProfileDetailsRepository(
+                  transport: widget.service.transport,
+                ),
           onSessionExpired: _controller.recoverExpiredSession,
           onSignOut: _controller.signOut,
         );

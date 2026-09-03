@@ -211,6 +211,68 @@ class AppLocalizationsIt extends AppLocalizations {
       'Su questo router non è configurato alcun profilo di controllo parentale.';
 
   @override
+  String get refreshProfileDetailsTooltip => 'Aggiorna i dettagli del profilo';
+
+  @override
+  String get loadingProfileDetails => 'Caricamento dettagli profilo…';
+
+  @override
+  String get loadProfileDetailsError =>
+      'Non è stato possibile caricare i dettagli del profilo dal router.';
+
+  @override
+  String get profileDetailsRefreshError =>
+      'Non è stato possibile aggiornare questi dettagli. Sono mostrati i dati caricati in precedenza.';
+
+  @override
+  String get today => 'Oggi';
+
+  @override
+  String get associatedDevices => 'Dispositivi associati';
+
+  @override
+  String get noAssociatedDevices =>
+      'Nessun dispositivo è associato a questo profilo.';
+
+  @override
+  String get unnamedDevice => 'Dispositivo senza nome';
+
+  @override
+  String get usageUnavailable => 'Non disponibile';
+
+  @override
+  String get usedToday => 'usati oggi';
+
+  @override
+  String get profileSchedule => 'Programmazione';
+
+  @override
+  String get allowanceMondayThursday => 'Tempo giornaliero · lun–gio';
+
+  @override
+  String get allowanceFridaySunday => 'Tempo giornaliero · ven–dom';
+
+  @override
+  String get bedtimeSundayThursday => 'Orario di riposo · dom–gio';
+
+  @override
+  String get bedtimeFridaySaturday => 'Orario di riposo · ven–sab';
+
+  @override
+  String get unlimited => 'Illimitato';
+
+  @override
+  String get notConfigured => 'Non configurato';
+
+  @override
+  String get activityThreshold => 'Soglia di attività';
+
+  @override
+  String activityThresholdBytes(int bytes) {
+    return '$bytes byte';
+  }
+
+  @override
   String durationHoursMinutes(int hours, int minutes) {
     return '$hours h $minutes min';
   }

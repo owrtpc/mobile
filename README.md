@@ -40,7 +40,7 @@ published SHA-256 before extraction. CI builds the same image and rejects
 missing Italian/English translations, formatting drift, analyzer findings and
 test failures.
 
-## Current connection and quick-action slice
+## Current profile and quick-action slice
 
 The app accepts router hosts only over HTTPS, calls the ubus JSON-RPC bridge at
 `/ubus`, performs `session.login`, checks read and quick-action ACLs, validates
@@ -51,6 +51,13 @@ non-synchronizing iOS Keychain or Android Keystore-backed encrypted storage.
 The app then signs in automatically at launch and renews an expired in-memory
 session without replaying writes. Logout removes the remembered login and
 best-effort destroys the router session.
+
+Tapping a profile opens its read-only details: current shared usage and state,
+the associated devices with discovered names and addresses, each device's
+diagnostic usage, daily allowances, bedtime windows and any profile-specific
+activity threshold. Device usage requires the optional API 1.2
+`device-usage` data; older backends continue to show the configured devices
+without inventing a usage value.
 
 Write-capable accounts can block or unblock a profile, enable or disable it and
 replace the temporary extra-time choice with one hour, four hours or all day.
