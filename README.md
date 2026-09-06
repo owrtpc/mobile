@@ -49,7 +49,7 @@ features increment MINOR, fixes increment PATCH and incompatible releases
 increment MAJOR. The integer after `+` is a separate, monotonically increasing
 store build identifier required by iOS and Android; it changes for every
 committed app build but does not replace the semantic version. For example,
-`0.2.0+9` is displayed by iOS as version `0.2.0`, build `9`.
+`0.2.0+10` is displayed by iOS as version `0.2.0`, build `10`.
 
 ## Current profile and quick-action slice
 
