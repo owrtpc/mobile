@@ -377,6 +377,7 @@ class _AssignedDeviceTile extends StatelessWidget {
       trailing: IconButton(
         key: Key('profile-editor-remove-device-$mac'),
         tooltip: strings.removeDeviceAction,
+        color: Theme.of(context).colorScheme.primary,
         onPressed: enabled ? onRemove : null,
         icon: const Icon(Icons.delete_outline_rounded),
       ),

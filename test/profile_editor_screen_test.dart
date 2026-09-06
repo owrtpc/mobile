@@ -98,9 +98,15 @@ void main() {
     );
 
     expect(find.text('Salva'), findsNWidgets(2));
-    await tester.tap(
-      find.byKey(const Key('profile-editor-remove-device-AA:BB:CC:DD:EE:FF')),
+    final removeDevice = find.byKey(
+      const Key('profile-editor-remove-device-AA:BB:CC:DD:EE:FF'),
     );
+    final removeButton = tester.widget<IconButton>(removeDevice);
+    expect(
+      removeButton.color,
+      Theme.of(tester.element(removeDevice)).colorScheme.primary,
+    );
+    await tester.tap(removeDevice);
     await tester.pump();
     expect(
       find.byKey(const Key('profile-editor-device-AA:BB:CC:DD:EE:FF')),
