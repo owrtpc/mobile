@@ -30,6 +30,7 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
   ProfileEditFailureKind? _failure;
 
   bool get _dirty => !_draft.hasSameValues(_original);
+  bool get _canSave => _dirty && _draft.isValid && !_applying;
 
   @override
   void initState() {
@@ -63,7 +64,18 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(strings.editProfileTitle),
+          title: Text(
+            widget.session.isCreating
+                ? strings.createProfileTitle
+                : strings.editProfileTitle,
+          ),
+          actions: [
+            TextButton(
+              key: const Key('profile-editor-save-top'),
+              onPressed: _canSave ? _apply : null,
+              child: Text(strings.saveProfileAction),
+            ),
+          ],
           bottom: _dirty
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(28),
@@ -116,27 +128,30 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
             _EditorSection(
               title: strings.profileEditorDevicesSection,
               description: strings.profileEditorDevicesExplanation,
-              child: widget.session.devices.isEmpty
-                  ? Text(strings.noAssociatedDevices)
-                  : Column(
-                      children: [
-                        for (final device in widget.session.devices)
-                          CheckboxListTile(
-                            key: Key('profile-editor-device-${device.mac}'),
-                            contentPadding: EdgeInsets.zero,
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: Text(device.name ?? strings.unnamedDevice),
-                            subtitle: Text(device.mac),
-                            value: _draft.devices.contains(device.mac),
-                            onChanged: _applying
-                                ? null
-                                : (selected) => _toggleDevice(
-                                    device.mac,
-                                    selected ?? false,
-                                  ),
-                          ),
-                      ],
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_draft.devices.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(strings.noAssociatedDevices),
+                    )
+                  else
+                    for (final mac in _draft.devices)
+                      _AssignedDeviceTile(
+                        device: _deviceFor(mac),
+                        fallbackMac: mac,
+                        enabled: !_applying,
+                        onRemove: () => _removeDevice(mac),
+                      ),
+                  OutlinedButton.icon(
+                    key: const Key('profile-editor-add-devices'),
+                    onPressed: _applying ? null : _addDevices,
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(strings.addDevicesAction),
+                  ),
+                ],
+              ),
             ),
             _EditorSection(
               title: strings.profileEditorAllowanceSection,
@@ -240,16 +255,14 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
             ],
             FilledButton.icon(
               key: const Key('profile-editor-apply'),
-              onPressed: _dirty && _draft.isValid && !_applying ? _apply : null,
+              onPressed: _canSave ? _apply : null,
               icon: _applying
                   ? const SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.check_rounded),
-              label: Text(
-                _applying ? strings.applyingChanges : strings.applyChanges,
-              ),
+              label: Text(strings.saveProfileAction),
             ),
           ],
         ),
@@ -264,14 +277,27 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
     _failure = null;
   });
 
-  void _toggleDevice(String mac, bool selected) {
-    final devices = [..._draft.devices];
-    if (selected) {
-      if (!devices.contains(mac)) devices.add(mac);
-    } else {
-      devices.remove(mac);
-    }
-    _change(_draft.copyWith(devices: devices));
+  ProfileEditDevice? _deviceFor(String mac) => widget.session.devices
+      .where((device) => device.details.mac == mac)
+      .firstOrNull;
+
+  void _removeDevice(String mac) =>
+      _change(_draft.copyWith(devices: [..._draft.devices]..remove(mac)));
+
+  Future<void> _addDevices() async {
+    final selected = await showModalBottomSheet<Set<String>>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => _DevicePickerSheet(
+        devices: widget.session.devices
+            .where((device) => !_draft.devices.contains(device.details.mac))
+            .toList(growable: false),
+        profileSection: _draft.section,
+      ),
+    );
+    if (selected == null || selected.isEmpty || !mounted) return;
+    _change(_draft.copyWith(devices: [..._draft.devices, ...selected]));
   }
 
   Future<void> _apply() async {
@@ -321,6 +347,162 @@ class _ProfileEditorScreenState extends State<ProfileEditorScreen> {
       ),
     );
     if (discard == true && mounted) Navigator.of(context).pop();
+  }
+}
+
+class _AssignedDeviceTile extends StatelessWidget {
+  const _AssignedDeviceTile({
+    required this.device,
+    required this.fallbackMac,
+    required this.enabled,
+    required this.onRemove,
+  });
+
+  final ProfileEditDevice? device;
+  final String fallbackMac;
+  final bool enabled;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final details = device?.details;
+    final mac = details?.mac ?? fallbackMac;
+    return ListTile(
+      key: Key('profile-editor-device-$mac'),
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.devices_rounded),
+      title: Text(details?.name ?? strings.unnamedDevice),
+      subtitle: Text([...?details?.addresses, mac].join(' · ')),
+      trailing: IconButton(
+        key: Key('profile-editor-remove-device-$mac'),
+        tooltip: strings.removeDeviceAction,
+        onPressed: enabled ? onRemove : null,
+        icon: const Icon(Icons.delete_outline_rounded),
+      ),
+    );
+  }
+}
+
+class _DevicePickerSheet extends StatefulWidget {
+  const _DevicePickerSheet({
+    required this.devices,
+    required this.profileSection,
+  });
+
+  final List<ProfileEditDevice> devices;
+  final String profileSection;
+
+  @override
+  State<_DevicePickerSheet> createState() => _DevicePickerSheetState();
+}
+
+class _DevicePickerSheetState extends State<_DevicePickerSheet> {
+  final Set<String> _selected = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final selectable = widget.devices.where(
+      (device) => !device.isAssignedElsewhere(widget.profileSection),
+    );
+    return SafeArea(
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * 0.72,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: Text(
+                strings.addDevicesTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: widget.devices.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          strings.noDevicesAvailable,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : ListView(
+                      children: [
+                        for (final device in widget.devices)
+                          CheckboxListTile(
+                            key: Key(
+                              'profile-device-option-${device.details.mac}',
+                            ),
+                            value: _selected.contains(device.details.mac),
+                            onChanged:
+                                device.isAssignedElsewhere(
+                                  widget.profileSection,
+                                )
+                                ? null
+                                : (checked) => setState(() {
+                                    if (checked ?? false) {
+                                      _selected.add(device.details.mac);
+                                    } else {
+                                      _selected.remove(device.details.mac);
+                                    }
+                                  }),
+                            title: Text(
+                              device.details.name ?? strings.unnamedDevice,
+                            ),
+                            subtitle: Text(
+                              device.isAssignedElsewhere(widget.profileSection)
+                                  ? strings.deviceAssignedToProfile(
+                                      device.assignedProfileName ?? '',
+                                    )
+                                  : [
+                                      ...device.details.addresses,
+                                      device.details.mac,
+                                    ].join(' · '),
+                            ),
+                          ),
+                      ],
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(strings.cancelAction),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      key: const Key('profile-device-picker-add'),
+                      onPressed: _selected.isEmpty
+                          ? null
+                          : () => Navigator.pop(context, _selected),
+                      child: Text(strings.addDevicesAction),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selectable.isEmpty && widget.devices.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Text(
+                  strings.allDevicesAssigned,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

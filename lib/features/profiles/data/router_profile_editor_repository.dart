@@ -6,6 +6,7 @@ import '../domain/profile_draft.dart';
 import '../domain/profile_edit_session.dart';
 import 'fixture_profiles_repository.dart';
 import 'profile_editor_repository.dart';
+import 'router_profile_details_repository.dart';
 
 class RouterProfileEditorRepository implements ProfileEditorRepository {
   const RouterProfileEditorRepository({required this.transport});
@@ -18,17 +19,50 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
     String section, {
     ProfileDetails? currentDetails,
   }) async {
+    return _loadSession(
+      router,
+      section: section,
+      currentDetails: currentDetails,
+    );
+  }
+
+  @override
+  Future<ProfileEditSession> loadForCreate(ConnectedRouter router) =>
+      _loadSession(router);
+
+  Future<ProfileEditSession> _loadSession(
+    ConnectedRouter router, {
+    String? section,
+    ProfileDetails? currentDetails,
+  }) async {
     final client = _client(router);
     try {
-      final payload = await client.call(
-        session: router.sessionToken,
-        object: 'owrtpc',
-        method: 'edit_snapshot',
-      );
+      final results = await Future.wait([
+        client.call(
+          session: router.sessionToken,
+          object: 'owrtpc',
+          method: 'edit_snapshot',
+        ),
+        _optionalCall(client, router, 'luci-rpc', 'getHostHints'),
+        _optionalCall(client, router, 'luci-rpc', 'getDHCPLeases'),
+        _optionalCall(
+          client,
+          router,
+          'uci',
+          'get',
+          parameters: const {'config': 'gl-client'},
+        ),
+      ]);
       return parseSession(
-        payload,
+        results[0],
         section: section,
         currentDetails: currentDetails,
+        discoveredDevices:
+            RouterProfileDetailsRepository.parseDiscoveredDevices(
+              hostHints: results[1],
+              leases: results[2],
+              aliases: results[3],
+            ),
       );
     } on UbusException catch (error) {
       if (error.code == 6 && await _sessionHasExpired(client, router)) {
@@ -54,33 +88,13 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
         session: router.sessionToken,
         object: 'owrtpc',
         method: 'profile_apply',
-        parameters: {
-          'expected_revision': session.revision,
-          'section': submittedDraft.section,
-          'name': submittedDraft.name,
-          'enabled': submittedDraft.enabled,
-          'mon_thu_daily_minutes': submittedDraft.monThuDailyMinutes,
-          'fri_sun_daily_minutes': submittedDraft.friSunDailyMinutes,
-          'sun_thu_bedtime_start': submittedDraft.sunThuBedtime.start ?? '',
-          'sun_thu_bedtime_end': submittedDraft.sunThuBedtime.end ?? '',
-          'fri_sat_bedtime_start': submittedDraft.friSatBedtime.start ?? '',
-          'fri_sat_bedtime_end': submittedDraft.friSatBedtime.end ?? '',
-          'activity_threshold_bytes':
-              submittedDraft.activityThresholdBytes ?? 0,
-          'devices': submittedDraft.devices,
-        },
+        parameters: _parameters(
+          session.revision,
+          submittedDraft,
+          includeSection: true,
+        ),
       );
-      if (payload['success'] != true || !_isRevision(payload['revision'])) {
-        final code = payload['code'];
-        throw ProfileEditException(switch (code) {
-          'conflicting_edit' => ProfileEditFailureKind.conflict,
-          'validation_failed' ||
-          'invalid_request' ||
-          'not_found' => ProfileEditFailureKind.validation,
-          'apply_failed' => ProfileEditFailureKind.apply,
-          _ => ProfileEditFailureKind.unavailable,
-        });
-      }
+      _validateWriteResponse(payload, expectedSection: submittedDraft.section);
 
       final verification = await Future.wait([
         client.call(
@@ -111,27 +125,135 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
     }
   }
 
+  @override
+  Future<String> create(
+    ConnectedRouter router,
+    ProfileEditSession session,
+    ProfileDraft draft,
+  ) async {
+    if (!session.isCreating || !draft.isValid || draft.section.isNotEmpty) {
+      throw const ProfileEditException(ProfileEditFailureKind.validation);
+    }
+    final submittedDraft = draft.copyWith(name: draft.name.trim());
+    final client = _client(router);
+    try {
+      final payload = await client.call(
+        session: router.sessionToken,
+        object: 'owrtpc',
+        method: 'profile_create',
+        parameters: _parameters(session.revision, submittedDraft),
+      );
+      final section = _validateWriteResponse(payload);
+      final createdDraft = submittedDraft.copyWith(section: section);
+      final verification = await Future.wait([
+        client.call(
+          session: router.sessionToken,
+          object: 'owrtpc',
+          method: 'edit_snapshot',
+        ),
+        client.call(
+          session: router.sessionToken,
+          object: 'owrtpc',
+          method: 'status',
+        ),
+      ]);
+      final verified = parseSession(verification[0], section: section);
+      if (verified.revision != payload['revision'] ||
+          !verified.draft.hasSameValues(createdDraft) ||
+          !_statusMatches(verification[1], createdDraft)) {
+        throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+      }
+      return section;
+    } on UbusException catch (error) {
+      if (error.code == 6 && await _sessionHasExpired(client, router)) {
+        throw const ProfilesSessionExpiredException();
+      }
+      rethrow;
+    }
+  }
+
   static ProfileEditSession parseSession(
     Map<String, Object?> payload, {
-    required String section,
+    String? section,
     ProfileDetails? currentDetails,
+    Map<String, ProfileDeviceDetails> discoveredDevices = const {},
   }) {
     final revision = payload['revision'];
     final profiles = payload['profiles'];
     if (!_isRevision(revision) || profiles is! List<Object?>) {
       throw const FormatException('invalid profile edit snapshot');
     }
+    final assignments = <String, String>{};
+    final profileNames = <String, String>{};
     Map<String, Object?>? profile;
     for (final item in profiles) {
-      if (item is Map<String, Object?> && item['section'] == section) {
-        profile = item;
-        break;
+      if (item is! Map<String, Object?> ||
+          item['section'] is! String ||
+          item['name'] is! String ||
+          item['devices'] is! List<Object?>) {
+        throw const FormatException('invalid profile edit snapshot');
       }
+      final itemSection = item['section']! as String;
+      profileNames[itemSection] = item['name']! as String;
+      for (final value in item['devices']! as List<Object?>) {
+        if (value is! String) {
+          throw const FormatException('invalid profile edit snapshot');
+        }
+        assignments.putIfAbsent(
+          ProfileDraft.canonicalMac(value),
+          () => itemSection,
+        );
+      }
+      if (itemSection == section) profile = item;
     }
-    if (profile == null) {
+    if (section != null && profile == null) {
       throw const FormatException('missing profile edit snapshot');
     }
 
+    final draft = profile == null
+        ? ProfileDraft.empty()
+        : _parseDraft(profile, section!);
+    final knownDevices = <String, ProfileDeviceDetails>{
+      for (final entry in discoveredDevices.entries)
+        ProfileDraft.canonicalMac(entry.key): entry.value,
+      for (final device in currentDetails?.devices ?? const [])
+        ProfileDraft.canonicalMac(device.mac): device,
+    };
+    for (final mac in assignments.keys) {
+      knownDevices.putIfAbsent(
+        mac,
+        () => ProfileDeviceDetails(
+          mac: mac,
+          name: null,
+          addresses: const [],
+          usedSeconds: null,
+        ),
+      );
+    }
+    final editableDevices =
+        knownDevices.entries.map((entry) {
+          final assignedSection = assignments[entry.key];
+          return ProfileEditDevice(
+            details: entry.value,
+            assignedSection: assignedSection,
+            assignedProfileName: profileNames[assignedSection],
+          );
+        }).toList()..sort((first, second) {
+          final firstLabel = first.details.name ?? first.details.mac;
+          final secondLabel = second.details.name ?? second.details.mac;
+          return firstLabel.toLowerCase().compareTo(secondLabel.toLowerCase());
+        });
+    return ProfileEditSession(
+      revision: revision as String,
+      draft: draft,
+      devices: List.unmodifiable(editableDevices),
+    );
+  }
+
+  static ProfileDraft _parseDraft(
+    Map<String, Object?> profile,
+    String section,
+  ) {
     final name = profile['name'];
     final enabled = profile['enabled'];
     final monThu = _nonNegativeInt(profile['mon_thu_daily_minutes']);
@@ -176,31 +298,30 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
     if (!draft.isValid) {
       throw const FormatException('invalid profile edit snapshot');
     }
-
-    final knownDevices = {
-      for (final device in currentDetails?.devices ?? const [])
-        ProfileDraft.canonicalMac(device.mac): device,
-    };
-    return ProfileEditSession(
-      revision: revision as String,
-      draft: draft,
-      devices: List.unmodifiable(
-        devices.map(
-          (mac) =>
-              knownDevices[mac] ??
-              ProfileDeviceDetails(
-                mac: mac,
-                name: null,
-                addresses: const [],
-                usedSeconds: null,
-              ),
-        ),
-      ),
-    );
+    return draft;
   }
 
   JsonRpcClient _client(ConnectedRouter router) =>
       JsonRpcClient(endpoint: router.endpoint.uri, transport: transport);
+
+  Future<Map<String, Object?>> _optionalCall(
+    JsonRpcClient client,
+    ConnectedRouter router,
+    String object,
+    String method, {
+    Map<String, Object?> parameters = const {},
+  }) async {
+    try {
+      return await client.call(
+        session: router.sessionToken,
+        object: object,
+        method: method,
+        parameters: parameters,
+      );
+    } on Object {
+      return const {};
+    }
+  }
 
   Future<bool> _sessionHasExpired(
     JsonRpcClient client,
@@ -227,6 +348,53 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
 
   static bool _isRevision(Object? value) =>
       value is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(value);
+
+  static Map<String, Object?> _parameters(
+    String revision,
+    ProfileDraft draft, {
+    bool includeSection = false,
+  }) => {
+    'expected_revision': revision,
+    if (includeSection) 'section': draft.section,
+    'name': draft.name,
+    'enabled': draft.enabled,
+    'mon_thu_daily_minutes': draft.monThuDailyMinutes,
+    'fri_sun_daily_minutes': draft.friSunDailyMinutes,
+    'sun_thu_bedtime_start': draft.sunThuBedtime.start ?? '',
+    'sun_thu_bedtime_end': draft.sunThuBedtime.end ?? '',
+    'fri_sat_bedtime_start': draft.friSatBedtime.start ?? '',
+    'fri_sat_bedtime_end': draft.friSatBedtime.end ?? '',
+    'activity_threshold_bytes': draft.activityThresholdBytes ?? 0,
+    'devices': draft.devices,
+  };
+
+  static String _validateWriteResponse(
+    Map<String, Object?> payload, {
+    String? expectedSection,
+  }) {
+    if (payload['success'] != true || !_isRevision(payload['revision'])) {
+      final code = payload['code'];
+      throw ProfileEditException(switch (code) {
+        'conflicting_edit' => ProfileEditFailureKind.conflict,
+        'validation_failed' ||
+        'invalid_request' ||
+        'not_found' => ProfileEditFailureKind.validation,
+        'apply_failed' => ProfileEditFailureKind.apply,
+        _ => ProfileEditFailureKind.unavailable,
+      });
+    }
+    final section = payload['section'];
+    if (expectedSection != null) {
+      if (section != null && section != expectedSection) {
+        throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+      }
+      return expectedSection;
+    }
+    if (section is! String || !RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(section)) {
+      throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+    }
+    return section;
+  }
 
   static int? _nonNegativeInt(Object? value) {
     if (value is! num || value != value.toInt() || value < 0) return null;

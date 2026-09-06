@@ -542,6 +542,12 @@ abstract class AppLocalizations {
   /// **'Edit profile'**
   String get editProfileTitle;
 
+  /// No description provided for @createProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New profile'**
+  String get createProfileTitle;
+
   /// No description provided for @unsavedChanges.
   ///
   /// In en, this message translates to:
@@ -563,8 +569,44 @@ abstract class AppLocalizations {
   /// No description provided for @profileEditorDevicesExplanation.
   ///
   /// In en, this message translates to:
-  /// **'Deselect a device to remove it from this profile.'**
+  /// **'Use the trash button to remove a device or add another available device.'**
   String get profileEditorDevicesExplanation;
+
+  /// No description provided for @addDevicesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add devices'**
+  String get addDevicesAction;
+
+  /// No description provided for @addDevicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add devices'**
+  String get addDevicesTitle;
+
+  /// No description provided for @removeDeviceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove device'**
+  String get removeDeviceAction;
+
+  /// No description provided for @noDevicesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The router did not find any other devices to add.'**
+  String get noDevicesAvailable;
+
+  /// No description provided for @allDevicesAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'All other devices are already assigned to a profile.'**
+  String get allDevicesAssigned;
+
+  /// No description provided for @deviceAssignedToProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Already assigned to {name}'**
+  String deviceAssignedToProfile(String name);
 
   /// No description provided for @profileEditorAllowanceSection.
   ///
@@ -674,6 +716,12 @@ abstract class AppLocalizations {
   /// **'Apply changes'**
   String get applyChanges;
 
+  /// No description provided for @saveProfileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveProfileAction;
+
   /// No description provided for @applyingChanges.
   ///
   /// In en, this message translates to:
@@ -685,6 +733,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} updated on the router.'**
   String profileEditApplied(String name);
+
+  /// No description provided for @profileCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} created on the router.'**
+  String profileCreated(String name);
+
+  /// No description provided for @profileCreateLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'A new profile could not be prepared from the router.'**
+  String get profileCreateLoadError;
 
   /// No description provided for @profileEditLoadError.
   ///

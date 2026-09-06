@@ -10,5 +10,22 @@ class ProfileEditSession {
 
   final String revision;
   final ProfileDraft draft;
-  final List<ProfileDeviceDetails> devices;
+  final List<ProfileEditDevice> devices;
+
+  bool get isCreating => draft.section.isEmpty;
+}
+
+class ProfileEditDevice {
+  const ProfileEditDevice({
+    required this.details,
+    required this.assignedSection,
+    required this.assignedProfileName,
+  });
+
+  final ProfileDeviceDetails details;
+  final String? assignedSection;
+  final String? assignedProfileName;
+
+  bool isAssignedElsewhere(String section) =>
+      assignedSection != null && assignedSection != section;
 }

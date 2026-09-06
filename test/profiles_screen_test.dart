@@ -3,6 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
 import 'package:owrtpc_mobile/features/profiles/data/fixture_profiles_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/data/profile_details_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/data/profile_editor_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/domain/profile_details.dart';
+import 'package:owrtpc_mobile/features/profiles/domain/profile_draft.dart';
+import 'package:owrtpc_mobile/features/profiles/domain/profile_edit_session.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_summary.dart';
 import 'package:owrtpc_mobile/features/profiles/presentation/profiles_screen.dart';
 import 'package:owrtpc_mobile/l10n/generated/app_localizations.dart';
@@ -143,6 +147,28 @@ void main() {
     expect(find.byKey(const Key('profile-details-refresh')), findsOneWidget);
   });
 
+  testWidgets('creates a profile from the profiles app bar', (tester) async {
+    final profiles = _FakeProfilesRepository([_allowedProfile]);
+    final editor = _FakeProfileEditorRepository();
+    await _pumpScreen(tester, profiles, editorRepository: editor);
+
+    await tester.tap(find.byKey(const Key('profiles-create-action')));
+    await tester.pumpAndSettle();
+    expect(find.text('New profile'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('profile-editor-name')),
+      'Guests',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('profile-editor-save-top')));
+    await tester.pumpAndSettle();
+
+    expect(editor.createCalls, 1);
+    expect(editor.lastCreated?.name, 'Guests');
+    expect(find.text('Guests created on the router.'), findsOneWidget);
+  });
+
   testWidgets('refreshes from both the app bar and pull gesture', (
     tester,
   ) async {
@@ -245,6 +271,7 @@ Future<void> _pumpScreen(
   ProfilesRepository repository, {
   Locale locale = const Locale('en'),
   Future<void> Function()? onSessionExpired,
+  ProfileEditorRepository? editorRepository,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -255,11 +282,62 @@ Future<void> _pumpScreen(
         router: _writableRouter,
         repository: repository,
         detailsRepository: const FixtureProfileDetailsRepository(),
+        editorRepository: editorRepository,
         onSessionExpired: onSessionExpired,
       ),
     ),
   );
   await tester.pumpAndSettle();
+}
+
+class _FakeProfileEditorRepository implements ProfileEditorRepository {
+  int createCalls = 0;
+  ProfileDraft? lastCreated;
+
+  @override
+  Future<ProfileEditSession> loadForCreate(ConnectedRouter router) async =>
+      ProfileEditSession(
+        revision:
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        draft: ProfileDraft.empty(),
+        devices: const [
+          ProfileEditDevice(
+            details: ProfileDeviceDetails(
+              mac: 'AA:BB:CC:DD:EE:FF',
+              name: 'Guest phone',
+              addresses: ['192.168.8.50'],
+              usedSeconds: null,
+            ),
+            assignedSection: null,
+            assignedProfileName: null,
+          ),
+        ],
+      );
+
+  @override
+  Future<String> create(
+    ConnectedRouter router,
+    ProfileEditSession session,
+    ProfileDraft draft,
+  ) async {
+    createCalls++;
+    lastCreated = draft;
+    return 'created';
+  }
+
+  @override
+  Future<ProfileEditSession> load(
+    ConnectedRouter router,
+    String section, {
+    ProfileDetails? currentDetails,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> apply(
+    ConnectedRouter router,
+    ProfileEditSession session,
+    ProfileDraft draft,
+  ) => throw UnimplementedError();
 }
 
 final _previewRouter = ConnectedRouter.preview();

@@ -77,10 +77,20 @@
   "durationHours": "{hours} h",
   "durationMinutes": "{minutes} min",
   "editProfileTitle": "Modifica profilo",
+  "createProfileTitle": "Nuovo profilo",
   "unsavedChanges": "Modifiche non salvate",
   "profileEditorProfileSection": "Profilo",
   "profileEditorDevicesSection": "Dispositivi",
-  "profileEditorDevicesExplanation": "Deseleziona un dispositivo per rimuoverlo da questo profilo.",
+  "profileEditorDevicesExplanation": "Usa il cestino per rimuovere un dispositivo o aggiungine altri tra quelli disponibili.",
+  "addDevicesAction": "Aggiungi dispositivi",
+  "addDevicesTitle": "Aggiungi dispositivi",
+  "removeDeviceAction": "Rimuovi dispositivo",
+  "noDevicesAvailable": "Il router non ha trovato altri dispositivi da aggiungere.",
+  "allDevicesAssigned": "Tutti gli altri dispositivi sono già assegnati a un profilo.",
+  "deviceAssignedToProfile": "Già assegnato a {name}",
+  "@deviceAssignedToProfile": {
+    "placeholders": { "name": { "type": "String" } }
+  },
   "profileEditorAllowanceSection": "Tempo giornaliero",
   "profileEditorAllowanceExplanation": "Il tempo è cumulativo tra i dispositivi del profilo. Usa 0 per renderlo illimitato.",
   "profileEditorBedtimeSection": "Orario di riposo",
@@ -102,11 +112,17 @@
   "bedtimeStarts": "Inizia {time}",
   "bedtimeEnds": "Termina {time}",
   "applyChanges": "Applica modifiche",
+  "saveProfileAction": "Salva",
   "applyingChanges": "Applicazione sul router…",
   "profileEditApplied": "{name} è stato aggiornato sul router.",
   "@profileEditApplied": {
     "placeholders": { "name": { "type": "String" } }
   },
+  "profileCreated": "{name} è stato creato sul router.",
+  "@profileCreated": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "profileCreateLoadError": "Non è stato possibile preparare un nuovo profilo dal router.",
   "profileEditLoadError": "Non è stato possibile caricare dal router il profilo modificabile.",
   "profileEditConflict": "La configurazione del router è cambiata mentre il profilo era aperto. Chiudi l’editor, ricaricalo e applica nuovamente le modifiche.",
   "profileEditValidationError": "Il router ha rifiutato queste impostazioni. Controlla i valori e riprova.",

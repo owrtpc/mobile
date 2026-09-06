@@ -24,6 +24,8 @@ class RouterCapabilities {
   bool get supportsSchedulePeriods => features.contains('schedule-periods');
   bool get supportsProfileEditTransaction =>
       features.contains('profile-edit-transaction');
+  bool get supportsProfileCreateTransaction =>
+      features.contains('profile-create-transaction');
 
   factory RouterCapabilities.fromJson(Map<String, Object?> json) {
     final api = json['api'];

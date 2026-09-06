@@ -118,7 +118,15 @@ class _EditorRepository implements ProfileEditorRepository {
     revision:
         'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     draft: ProfileDraft.fromDetails(currentDetails!),
-    devices: currentDetails.devices,
+    devices: currentDetails.devices
+        .map(
+          (device) => ProfileEditDevice(
+            details: device,
+            assignedSection: section,
+            assignedProfileName: currentDetails.summary.name,
+          ),
+        )
+        .toList(),
   );
 
   @override
@@ -127,6 +135,22 @@ class _EditorRepository implements ProfileEditorRepository {
     ProfileEditSession session,
     ProfileDraft draft,
   ) async {}
+
+  @override
+  Future<ProfileEditSession> loadForCreate(ConnectedRouter router) async =>
+      ProfileEditSession(
+        revision:
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        draft: ProfileDraft.empty(),
+        devices: const [],
+      );
+
+  @override
+  Future<String> create(
+    ConnectedRouter router,
+    ProfileEditSession session,
+    ProfileDraft draft,
+  ) async => 'created';
 }
 
 final _editingRouter = ConnectedRouter(

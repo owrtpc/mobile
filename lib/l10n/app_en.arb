@@ -140,10 +140,20 @@
     "placeholders": { "minutes": { "type": "int" } }
   },
   "editProfileTitle": "Edit profile",
+  "createProfileTitle": "New profile",
   "unsavedChanges": "Unsaved changes",
   "profileEditorProfileSection": "Profile",
   "profileEditorDevicesSection": "Devices",
-  "profileEditorDevicesExplanation": "Deselect a device to remove it from this profile.",
+  "profileEditorDevicesExplanation": "Use the trash button to remove a device or add another available device.",
+  "addDevicesAction": "Add devices",
+  "addDevicesTitle": "Add devices",
+  "removeDeviceAction": "Remove device",
+  "noDevicesAvailable": "The router did not find any other devices to add.",
+  "allDevicesAssigned": "All other devices are already assigned to a profile.",
+  "deviceAssignedToProfile": "Already assigned to {name}",
+  "@deviceAssignedToProfile": {
+    "placeholders": { "name": { "type": "String" } }
+  },
   "profileEditorAllowanceSection": "Daily allowance",
   "profileEditorAllowanceExplanation": "Time is cumulative across the profile devices. Use 0 for unlimited.",
   "profileEditorBedtimeSection": "Bedtime",
@@ -171,11 +181,17 @@
     "placeholders": { "time": { "type": "String" } }
   },
   "applyChanges": "Apply changes",
+  "saveProfileAction": "Save",
   "applyingChanges": "Applying on router…",
   "profileEditApplied": "{name} updated on the router.",
   "@profileEditApplied": {
     "placeholders": { "name": { "type": "String" } }
   },
+  "profileCreated": "{name} created on the router.",
+  "@profileCreated": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "profileCreateLoadError": "A new profile could not be prepared from the router.",
   "profileEditLoadError": "The editable profile could not be loaded from the router.",
   "profileEditConflict": "The router configuration changed while this profile was open. Close the editor, reload it and apply your changes again.",
   "profileEditValidationError": "The router rejected these profile settings. Check the values and try again.",

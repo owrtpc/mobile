@@ -7,8 +7,11 @@ import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
 import '../data/profile_details_repository.dart';
 import '../data/profile_editor_repository.dart';
+import '../domain/profile_draft.dart';
+import '../domain/profile_edit_session.dart';
 import '../domain/profile_summary.dart';
 import 'profile_details_screen.dart';
+import 'profile_editor_screen.dart';
 
 class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
@@ -43,6 +46,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
   bool _connectionHealthy = false;
   bool _reloadAfterAction = false;
   bool _reloadAfterCurrent = false;
+  bool _creatingProfile = false;
   Timer? _freshnessTimer;
   Future<void>? _refreshFuture;
 
@@ -55,6 +59,11 @@ class _ProfilesScreenState extends State<ProfilesScreen>
   bool get _supportsWrites =>
       widget.router.canWrite &&
       widget.router.capabilities.features.contains('quick-actions');
+
+  bool get _supportsProfileCreation =>
+      widget.editorRepository != null &&
+      widget.router.canWrite &&
+      widget.router.capabilities.supportsProfileCreateTransaction;
 
   @override
   void initState() {
@@ -193,6 +202,21 @@ class _ProfilesScreenState extends State<ProfilesScreen>
           ],
         ),
         actions: [
+          if (_supportsProfileCreation)
+            IconButton(
+              key: const Key('profiles-create-action'),
+              tooltip: strings.createProfileTitle,
+              onPressed:
+                  _busyProfile == null && !_refreshing && !_creatingProfile
+                  ? _openCreate
+                  : null,
+              icon: _creatingProfile
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.person_add_alt_1_rounded),
+            ),
           IconButton(
             key: const Key('profiles-refresh-action'),
             tooltip: strings.refreshTooltip,
@@ -305,6 +329,77 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       ),
     );
     if (mounted) await _reload(userInitiated: true);
+  }
+
+  Future<void> _openCreate({bool recoverSession = true}) async {
+    final repository = widget.editorRepository;
+    if (repository == null || _creatingProfile) return;
+    setState(() => _creatingProfile = true);
+    try {
+      final session = await repository.loadForCreate(widget.router);
+      if (!mounted) return;
+      final created = await Navigator.of(context).push<ProfileDraft>(
+        MaterialPageRoute(
+          builder: (_) => ProfileEditorScreen(
+            session: session,
+            onApply: (draft) => _create(repository, session, draft),
+          ),
+        ),
+      );
+      if (!mounted || created == null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).profileCreated(created.name),
+          ),
+        ),
+      );
+      await _reload(userInitiated: true);
+    } on ProfilesSessionExpiredException {
+      if (recoverSession && widget.onSessionExpired != null) {
+        await widget.onSessionExpired!.call();
+        if (mounted) {
+          setState(() => _creatingProfile = false);
+          await _openCreate(recoverSession: false);
+        }
+        return;
+      }
+      if (mounted) _showCreateLoadError();
+    } on Object {
+      if (mounted) _showCreateLoadError();
+    } finally {
+      if (mounted) setState(() => _creatingProfile = false);
+    }
+  }
+
+  Future<void> _create(
+    ProfileEditorRepository repository,
+    ProfileEditSession session,
+    ProfileDraft draft, {
+    bool recoverSession = true,
+  }) async {
+    try {
+      await repository.create(widget.router, session, draft);
+    } on ProfilesSessionExpiredException {
+      if (recoverSession && widget.onSessionExpired != null) {
+        await widget.onSessionExpired!.call();
+        await _create(repository, session, draft, recoverSession: false);
+        return;
+      }
+      throw const ProfileEditException(ProfileEditFailureKind.sessionExpired);
+    } on ProfileEditException {
+      rethrow;
+    } on Object {
+      throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+    }
+  }
+
+  void _showCreateLoadError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).profileCreateLoadError),
+      ),
+    );
   }
 
   Future<void> _changeBlocked(ProfileSummary profile) async {

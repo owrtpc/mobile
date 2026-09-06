@@ -115,42 +115,11 @@ class RouterProfileDetailsRepository implements ProfileDetailsRepository {
       }
     }
 
-    final discovered = <String, _DiscoveredDevice>{};
-    for (final entry in hostHints.entries) {
-      final mac = _canonicalMac(entry.key);
-      if (!_isMac(mac) || entry.value is! Map<String, Object?>) continue;
-      final hint = entry.value! as Map<String, Object?>;
-      final device = discovered.putIfAbsent(mac, _DiscoveredDevice.new);
-      device.hintName = _cleanName(hint['name']);
-      _addStrings(device.addresses, hint['ipaddrs'] ?? hint['ipv4']);
-      _addStrings(device.addresses, hint['ip6addrs'] ?? hint['ipv6']);
-    }
-    for (final lease in [
-      ..._objectList(leases['dhcp_leases']),
-      ..._objectList(leases['dhcp6_leases']),
-    ]) {
-      final mac = _canonicalMac(lease['macaddr']);
-      if (!_isMac(mac)) continue;
-      final device = discovered.putIfAbsent(mac, _DiscoveredDevice.new);
-      final hostname = _cleanName(lease['hostname']);
-      if (hostname != null && !device.hostnames.contains(hostname)) {
-        device.hostnames.add(hostname);
-      }
-      _addString(device.addresses, lease['ipaddr']);
-      _addString(device.addresses, lease['ip6addr']);
-    }
-    final aliasValues = aliases['values'];
-    if (aliasValues is Map<String, Object?>) {
-      for (final value in aliasValues.values) {
-        if (value is! Map<String, Object?> || value['.type'] != 'client') {
-          continue;
-        }
-        final mac = _canonicalMac(value['mac']);
-        if (!_isMac(mac)) continue;
-        discovered.putIfAbsent(mac, _DiscoveredDevice.new).aliasName =
-            _cleanName(value['alias']);
-      }
-    }
+    final discovered = parseDiscoveredDevices(
+      hostHints: hostHints,
+      leases: leases,
+      aliases: aliases,
+    );
 
     final devices = <ProfileDeviceDetails>[];
     for (final mac in _configuredDevices(rawConfiguration['device'])) {
@@ -158,11 +127,8 @@ class RouterProfileDetailsRepository implements ProfileDetailsRepository {
       devices.add(
         ProfileDeviceDetails(
           mac: mac,
-          name:
-              discovery?.aliasName ??
-              discovery?.hintName ??
-              discovery?.hostnames.firstOrNull,
-          addresses: List.unmodifiable(discovery?.addresses ?? const []),
+          name: discovery?.name,
+          addresses: discovery?.addresses ?? const [],
           usedSeconds: usageByMac[mac],
         ),
       );
@@ -209,6 +175,62 @@ class RouterProfileDetailsRepository implements ProfileDetailsRepository {
         rawConfiguration['activity_threshold_bytes'],
       ),
     );
+  }
+
+  static Map<String, ProfileDeviceDetails> parseDiscoveredDevices({
+    Map<String, Object?> hostHints = const {},
+    Map<String, Object?> leases = const {},
+    Map<String, Object?> aliases = const {},
+  }) {
+    final discovered = <String, _DiscoveredDevice>{};
+    for (final entry in hostHints.entries) {
+      final mac = _canonicalMac(entry.key);
+      if (!_isMac(mac) || entry.value is! Map<String, Object?>) continue;
+      final hint = entry.value! as Map<String, Object?>;
+      final device = discovered.putIfAbsent(mac, _DiscoveredDevice.new);
+      device.hintName = _cleanName(hint['name']);
+      _addStrings(device.addresses, hint['ipaddrs'] ?? hint['ipv4']);
+      _addStrings(device.addresses, hint['ip6addrs'] ?? hint['ipv6']);
+    }
+    for (final lease in [
+      ..._objectList(leases['dhcp_leases']),
+      ..._objectList(leases['dhcp6_leases']),
+    ]) {
+      final mac = _canonicalMac(lease['macaddr']);
+      if (!_isMac(mac)) continue;
+      final device = discovered.putIfAbsent(mac, _DiscoveredDevice.new);
+      final hostname = _cleanName(lease['hostname']);
+      if (hostname != null && !device.hostnames.contains(hostname)) {
+        device.hostnames.add(hostname);
+      }
+      _addString(device.addresses, lease['ipaddr']);
+      _addString(device.addresses, lease['ip6addr']);
+    }
+    final aliasValues = aliases['values'];
+    if (aliasValues is Map<String, Object?>) {
+      for (final value in aliasValues.values) {
+        if (value is! Map<String, Object?> || value['.type'] != 'client') {
+          continue;
+        }
+        final mac = _canonicalMac(value['mac']);
+        if (!_isMac(mac)) continue;
+        discovered.putIfAbsent(mac, _DiscoveredDevice.new).aliasName =
+            _cleanName(value['alias']);
+      }
+    }
+
+    return {
+      for (final entry in discovered.entries)
+        entry.key: ProfileDeviceDetails(
+          mac: entry.key,
+          name:
+              entry.value.aliasName ??
+              entry.value.hintName ??
+              entry.value.hostnames.firstOrNull,
+          addresses: List.unmodifiable(entry.value.addresses),
+          usedSeconds: null,
+        ),
+    };
   }
 
   Future<Map<String, Object?>> _optionalCall(

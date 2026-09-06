@@ -291,6 +291,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get editProfileTitle => 'Modifica profilo';
 
   @override
+  String get createProfileTitle => 'Nuovo profilo';
+
+  @override
   String get unsavedChanges => 'Modifiche non salvate';
 
   @override
@@ -301,7 +304,29 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get profileEditorDevicesExplanation =>
-      'Deseleziona un dispositivo per rimuoverlo da questo profilo.';
+      'Usa il cestino per rimuovere un dispositivo o aggiungine altri tra quelli disponibili.';
+
+  @override
+  String get addDevicesAction => 'Aggiungi dispositivi';
+
+  @override
+  String get addDevicesTitle => 'Aggiungi dispositivi';
+
+  @override
+  String get removeDeviceAction => 'Rimuovi dispositivo';
+
+  @override
+  String get noDevicesAvailable =>
+      'Il router non ha trovato altri dispositivi da aggiungere.';
+
+  @override
+  String get allDevicesAssigned =>
+      'Tutti gli altri dispositivi sono già assegnati a un profilo.';
+
+  @override
+  String deviceAssignedToProfile(String name) {
+    return 'Già assegnato a $name';
+  }
 
   @override
   String get profileEditorAllowanceSection => 'Tempo giornaliero';
@@ -366,12 +391,24 @@ class AppLocalizationsIt extends AppLocalizations {
   String get applyChanges => 'Applica modifiche';
 
   @override
+  String get saveProfileAction => 'Salva';
+
+  @override
   String get applyingChanges => 'Applicazione sul router…';
 
   @override
   String profileEditApplied(String name) {
     return '$name è stato aggiornato sul router.';
   }
+
+  @override
+  String profileCreated(String name) {
+    return '$name è stato creato sul router.';
+  }
+
+  @override
+  String get profileCreateLoadError =>
+      'Non è stato possibile preparare un nuovo profilo dal router.';
 
   @override
   String get profileEditLoadError =>

@@ -291,6 +291,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProfileTitle => 'Edit profile';
 
   @override
+  String get createProfileTitle => 'New profile';
+
+  @override
   String get unsavedChanges => 'Unsaved changes';
 
   @override
@@ -301,7 +304,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEditorDevicesExplanation =>
-      'Deselect a device to remove it from this profile.';
+      'Use the trash button to remove a device or add another available device.';
+
+  @override
+  String get addDevicesAction => 'Add devices';
+
+  @override
+  String get addDevicesTitle => 'Add devices';
+
+  @override
+  String get removeDeviceAction => 'Remove device';
+
+  @override
+  String get noDevicesAvailable =>
+      'The router did not find any other devices to add.';
+
+  @override
+  String get allDevicesAssigned =>
+      'All other devices are already assigned to a profile.';
+
+  @override
+  String deviceAssignedToProfile(String name) {
+    return 'Already assigned to $name';
+  }
 
   @override
   String get profileEditorAllowanceSection => 'Daily allowance';
@@ -366,12 +391,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get applyChanges => 'Apply changes';
 
   @override
+  String get saveProfileAction => 'Save';
+
+  @override
   String get applyingChanges => 'Applying on router…';
 
   @override
   String profileEditApplied(String name) {
     return '$name updated on the router.';
   }
+
+  @override
+  String profileCreated(String name) {
+    return '$name created on the router.';
+  }
+
+  @override
+  String get profileCreateLoadError =>
+      'A new profile could not be prepared from the router.';
 
   @override
   String get profileEditLoadError =>

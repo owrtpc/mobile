@@ -29,4 +29,12 @@ abstract interface class ProfileEditorRepository {
     ProfileEditSession session,
     ProfileDraft draft,
   );
+
+  Future<ProfileEditSession> loadForCreate(ConnectedRouter router);
+
+  Future<String> create(
+    ConnectedRouter router,
+    ProfileEditSession session,
+    ProfileDraft draft,
+  );
 }

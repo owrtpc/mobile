@@ -12,6 +12,7 @@ void main() {
       'profiles.write',
       'schedule-periods',
       'profile-edit-transaction',
+      'profile-create-transaction',
     ],
     'router_date': '2026-08-28',
     'router_timezone': 'Europe/Rome',
@@ -24,6 +25,7 @@ void main() {
     expect(capabilities.features, contains('profiles.read'));
     expect(capabilities.supportsSchedulePeriods, isTrue);
     expect(capabilities.supportsProfileEditTransaction, isTrue);
+    expect(capabilities.supportsProfileCreateTransaction, isTrue);
     expect(capabilities.backendVersion, '0.1.0_alpha1-r25');
   });
 

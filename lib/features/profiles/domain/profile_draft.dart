@@ -36,6 +36,18 @@ class ProfileDraft {
     activityThresholdBytes: details.activityThresholdBytes,
   );
 
+  factory ProfileDraft.empty() => ProfileDraft(
+    section: '',
+    name: '',
+    enabled: true,
+    devices: const [],
+    monThuDailyMinutes: 0,
+    friSunDailyMinutes: 0,
+    sunThuBedtime: const BedtimeWindow(start: null, end: null),
+    friSatBedtime: const BedtimeWindow(start: null, end: null),
+    activityThresholdBytes: null,
+  );
+
   final String section;
   final String name;
   final bool enabled;
@@ -80,6 +92,7 @@ class ProfileDraft {
   bool get isValid => issues.isEmpty;
 
   ProfileDraft copyWith({
+    String? section,
     String? name,
     bool? enabled,
     List<String>? devices,
@@ -90,7 +103,7 @@ class ProfileDraft {
     int? activityThresholdBytes,
     bool clearActivityThreshold = false,
   }) => ProfileDraft(
-    section: section,
+    section: section ?? this.section,
     name: name ?? this.name,
     enabled: enabled ?? this.enabled,
     devices: devices ?? this.devices,

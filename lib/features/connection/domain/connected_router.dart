@@ -25,7 +25,7 @@ class ConnectedRouter {
     capabilities: const RouterCapabilities(
       api: RouterCapabilities.supportedApi,
       major: RouterCapabilities.supportedMajor,
-      minor: 2,
+      minor: 4,
       backendVersion: 'preview',
       features: {
         'profiles.read',
@@ -35,6 +35,8 @@ class ConnectedRouter {
         'uci-apply-confirm',
         'schedule-periods',
         'device-usage',
+        'profile-edit-transaction',
+        'profile-create-transaction',
       },
       routerDate: '2026-08-28',
       routerTimezone: 'Europe/Rome',

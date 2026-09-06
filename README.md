@@ -66,8 +66,11 @@ automatically after an ambiguous result. With a core exposing API 1.3 and
 `profile-edit-transaction`, they can also edit an existing profile's name,
 enabled state, assigned devices, allowances, bedtime windows and activity
 threshold. The app submits a complete revision-bound draft, then verifies both
-the committed snapshot and live policy state before reporting success. Profile
-creation, deletion and discovery-based reassignment remain part of M3.
+the committed snapshot and live policy state before reporting success. With API
+1.4 and `profile-create-transaction`, users can also create profiles and assign
+unassigned devices discovered by the router. Devices already owned by another
+profile remain visible but unavailable, preserving exclusive assignment.
+Profile deletion remains part of M3.
 
 TLS uses the operating system trust store first. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its

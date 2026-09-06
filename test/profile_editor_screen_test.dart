@@ -76,6 +76,61 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('removes with trash, adds available devices and saves from top', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    ProfileDraft? saved;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('it'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ProfileEditorScreen(
+          session: _session,
+          onApply: (draft) async => saved = draft,
+        ),
+      ),
+    );
+
+    expect(find.text('Salva'), findsNWidgets(2));
+    await tester.tap(
+      find.byKey(const Key('profile-editor-remove-device-AA:BB:CC:DD:EE:FF')),
+    );
+    await tester.pump();
+    expect(
+      find.byKey(const Key('profile-editor-device-AA:BB:CC:DD:EE:FF')),
+      findsNothing,
+    );
+
+    await tester.tap(find.byKey(const Key('profile-editor-add-devices')));
+    await tester.pumpAndSettle();
+    final available = find.byKey(
+      const Key('profile-device-option-11:22:33:44:55:66'),
+    );
+    final assigned = find.byKey(
+      const Key('profile-device-option-22:33:44:55:66:77'),
+    );
+    expect(tester.widget<CheckboxListTile>(available).onChanged, isNotNull);
+    expect(tester.widget<CheckboxListTile>(assigned).onChanged, isNull);
+    expect(find.text('Già assegnato a Parents'), findsOneWidget);
+    await tester.tap(available);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('profile-device-picker-add')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('profile-editor-device-11:22:33:44:55:66')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('profile-editor-save-top')));
+    await tester.pumpAndSettle();
+    expect(saved?.devices, ['11:22:33:44:55:66']);
+  });
 }
 
 const _summary = ProfileSummary(
@@ -111,5 +166,31 @@ const _details = ProfileDetails(
 final _session = ProfileEditSession(
   revision: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   draft: ProfileDraft.fromDetails(_details),
-  devices: _details.devices,
+  devices: [
+    ProfileEditDevice(
+      details: _details.devices.first,
+      assignedSection: 'children',
+      assignedProfileName: 'Children',
+    ),
+    const ProfileEditDevice(
+      details: ProfileDeviceDetails(
+        mac: '11:22:33:44:55:66',
+        name: 'Phone',
+        addresses: ['192.168.8.41'],
+        usedSeconds: null,
+      ),
+      assignedSection: null,
+      assignedProfileName: null,
+    ),
+    const ProfileEditDevice(
+      details: ProfileDeviceDetails(
+        mac: '22:33:44:55:66:77',
+        name: 'Console',
+        addresses: ['192.168.8.42'],
+        usedSeconds: null,
+      ),
+      assignedSection: 'parents',
+      assignedProfileName: 'Parents',
+    ),
+  ],
 );
