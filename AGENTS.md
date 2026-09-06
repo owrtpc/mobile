@@ -5,8 +5,10 @@
 - Every mobile modification that is committed and pushed must also increment
   the build number in `pubspec.yaml`; never reuse a build number for different
   committed source.
-- Update the semantic app version as well when the change warrants a new
-  patch, minor, or major release.
+- Follow Semantic Versioning for the public app version: fixes increment PATCH,
+  backward-compatible features increment MINOR and incompatible changes
+  increment MAJOR. The separate integer build number is not a substitute for
+  the semantic version.
 - Run the full project checks before committing.
 - Commit and push the version bump together with the related modification
   whenever possible. If a bump was missed, use the next build number implied

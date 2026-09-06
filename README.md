@@ -26,10 +26,12 @@ packages without writing a global SDK or package cache onto the Mac.
 Android tooling will be added as a separate pinned Docker image layer. Shared
 Dart code is generated and tested in the container. Compiling, signing and
 running the iOS target requires macOS, Xcode, the matching iOS platform and an
-Apple Development team. A temporary verified macOS Flutter SDK can be used
-without adding Flutter to the host `PATH`:
+Apple Development team. Bootstrap the pinned macOS SDK once into the
+project-local, Git-ignored persistent cache, then use it without adding Flutter
+to the host `PATH`:
 
 ```sh
+./tool/bootstrap-ios.sh
 ./tool/ios.sh doctor -v
 ./tool/ios.sh build ios --debug --no-codesign
 ./tool/ios.sh devices
@@ -39,6 +41,15 @@ The Flutter image uses the official 3.47.2 Linux archive and verifies its
 published SHA-256 before extraction. CI builds the same image and rejects
 missing Italian/English translations, formatting drift, analyzer findings and
 test failures.
+
+## Versioning
+
+The app uses Semantic Versioning for its public version. Backward-compatible
+features increment MINOR, fixes increment PATCH and incompatible releases
+increment MAJOR. The integer after `+` is a separate, monotonically increasing
+store build identifier required by iOS and Android; it changes for every
+committed app build but does not replace the semantic version. For example,
+`0.2.0+9` is displayed by iOS as version `0.2.0`, build `9`.
 
 ## Current profile and quick-action slice
 
