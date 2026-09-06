@@ -136,10 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     final packageInfo = snapshot.data;
                     final value = packageInfo == null
                         ? '—'
-                        : strings.appVersionValue(
-                            packageInfo.version,
-                            packageInfo.buildNumber,
-                          );
+                        : packageInfo.version;
                     return ListTile(
                       key: const Key('app-version'),
                       leading: const Icon(Icons.tag_rounded),

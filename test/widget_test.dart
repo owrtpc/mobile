@@ -315,7 +315,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Version'), findsOneWidget);
-    expect(find.text('0.1.0 (1)'), findsOneWidget);
+    expect(find.text('0.1.0'), findsOneWidget);
   });
 
   testWidgets('switches immediately between English and Italian', (

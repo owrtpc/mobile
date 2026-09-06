@@ -192,7 +192,6 @@
   "about": "Informazioni su OWRTPC",
   "privacySummary": "Solo locale · nessun cloud o analytics",
   "appVersion": "Versione",
-  "appVersionValue": "{version} ({buildNumber})",
   "signOut": "Disconnetti",
   "familyProfile": "Famiglia",
   "childrenProfile": "Bambini",

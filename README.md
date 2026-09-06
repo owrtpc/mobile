@@ -46,10 +46,11 @@ test failures.
 
 The app uses Semantic Versioning for its public version. Backward-compatible
 features increment MINOR, fixes increment PATCH and incompatible releases
-increment MAJOR. The integer after `+` is a separate, monotonically increasing
-store build identifier required by iOS and Android; it changes for every
-committed app build but does not replace the semantic version. For example,
-`0.2.0+10` is displayed by iOS as version `0.2.0`, build `10`.
+increment MAJOR. Every committed app modification advances at least PATCH. The
+integer after `+` is separate store metadata required by iOS and Android; it is
+monotonically increasing but is not shown as the app version. For example,
+`0.2.1+11` is displayed in the app as `0.2.1`; the operating system retains
+build `11` for installation diagnostics.
 
 ## Current profile and quick-action slice
 

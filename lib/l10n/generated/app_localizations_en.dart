@@ -650,11 +650,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appVersion => 'Version';
 
   @override
-  String appVersionValue(String version, String buildNumber) {
-    return '$version ($buildNumber)';
-  }
-
-  @override
   String get signOut => 'Sign out';
 
   @override
