@@ -536,6 +536,210 @@ abstract class AppLocalizations {
   /// **'{minutes}m'**
   String durationMinutes(int minutes);
 
+  /// No description provided for @editProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfileTitle;
+
+  /// No description provided for @unsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get unsavedChanges;
+
+  /// No description provided for @profileEditorProfileSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileEditorProfileSection;
+
+  /// No description provided for @profileEditorDevicesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices'**
+  String get profileEditorDevicesSection;
+
+  /// No description provided for @profileEditorDevicesExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect a device to remove it from this profile.'**
+  String get profileEditorDevicesExplanation;
+
+  /// No description provided for @profileEditorAllowanceSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance'**
+  String get profileEditorAllowanceSection;
+
+  /// No description provided for @profileEditorAllowanceExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Time is cumulative across the profile devices. Use 0 for unlimited.'**
+  String get profileEditorAllowanceExplanation;
+
+  /// No description provided for @profileEditorBedtimeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedtime'**
+  String get profileEditorBedtimeSection;
+
+  /// No description provided for @profileEditorBedtimeExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Each day identifies the evening when bedtime starts. Crossing midnight is normal.'**
+  String get profileEditorBedtimeExplanation;
+
+  /// No description provided for @profileEditorActivitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity detection'**
+  String get profileEditorActivitySection;
+
+  /// No description provided for @profileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile name'**
+  String get profileName;
+
+  /// No description provided for @profileNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Use no more than 80 characters.'**
+  String get profileNameTooLong;
+
+  /// No description provided for @profileEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile enabled'**
+  String get profileEnabled;
+
+  /// No description provided for @allowanceMinutesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes · 0 means unlimited'**
+  String get allowanceMinutesHelp;
+
+  /// No description provided for @activityDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensitivity'**
+  String get activityDetection;
+
+  /// No description provided for @activityDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Router default'**
+  String get activityDefault;
+
+  /// No description provided for @activitySensitive.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensitive · 32 KiB/sample'**
+  String get activitySensitive;
+
+  /// No description provided for @activityStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard · 128 KiB/sample'**
+  String get activityStandard;
+
+  /// No description provided for @activityLowSensitivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Low sensitivity · 256 KiB/sample'**
+  String get activityLowSensitivity;
+
+  /// No description provided for @activityCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom · {bytes} bytes/sample'**
+  String activityCustom(int bytes);
+
+  /// No description provided for @bedtimeStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {time}'**
+  String bedtimeStarts(String time);
+
+  /// No description provided for @bedtimeEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {time}'**
+  String bedtimeEnds(String time);
+
+  /// No description provided for @applyChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes'**
+  String get applyChanges;
+
+  /// No description provided for @applyingChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying on router…'**
+  String get applyingChanges;
+
+  /// No description provided for @profileEditApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} updated on the router.'**
+  String profileEditApplied(String name);
+
+  /// No description provided for @profileEditLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The editable profile could not be loaded from the router.'**
+  String get profileEditLoadError;
+
+  /// No description provided for @profileEditConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The router configuration changed while this profile was open. Close the editor, reload it and apply your changes again.'**
+  String get profileEditConflict;
+
+  /// No description provided for @profileEditValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'The router rejected these profile settings. Check the values and try again.'**
+  String get profileEditValidationError;
+
+  /// No description provided for @profileEditApplyError.
+  ///
+  /// In en, this message translates to:
+  /// **'The router restored the previous configuration because the new policy could not be applied.'**
+  String get profileEditApplyError;
+
+  /// No description provided for @profileEditSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your router session expired. Try applying the changes again.'**
+  String get profileEditSessionExpired;
+
+  /// No description provided for @profileEditUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The result could not be confirmed. Refresh the profile before trying again.'**
+  String get profileEditUnavailable;
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This profile has changes that have not been applied to the router.'**
+  String get discardChangesBody;
+
+  /// No description provided for @discardChangesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChangesAction;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:

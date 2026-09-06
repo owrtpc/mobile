@@ -52,7 +52,7 @@ The app then signs in automatically at launch and renews an expired in-memory
 session without replaying writes. Logout removes the remembered login and
 best-effort destroys the router session.
 
-Tapping a profile opens its read-only details: current shared usage and state,
+Tapping a profile opens its details: current shared usage and state,
 the associated devices with discovered names and addresses, each device's
 diagnostic usage, daily allowances, bedtime windows and any profile-specific
 activity threshold. Device usage requires the optional API 1.2
@@ -62,8 +62,12 @@ without inventing a usage value.
 Write-capable accounts can block or unblock a profile, enable or disable it and
 replace the temporary extra-time choice with one hour, four hours or all day.
 Every write is followed by a fresh status read and is never retried
-automatically after an ambiguous result. Full profile creation and editing
-remain part of M3.
+automatically after an ambiguous result. With a core exposing API 1.3 and
+`profile-edit-transaction`, they can also edit an existing profile's name,
+enabled state, assigned devices, allowances, bedtime windows and activity
+threshold. The app submits a complete revision-bound draft, then verifies both
+the committed snapshot and live policy state before reporting success. Profile
+creation, deletion and discovery-based reassignment remain part of M3.
 
 TLS uses the operating system trust store first. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its

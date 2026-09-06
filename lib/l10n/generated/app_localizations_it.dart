@@ -288,6 +288,126 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get editProfileTitle => 'Modifica profilo';
+
+  @override
+  String get unsavedChanges => 'Modifiche non salvate';
+
+  @override
+  String get profileEditorProfileSection => 'Profilo';
+
+  @override
+  String get profileEditorDevicesSection => 'Dispositivi';
+
+  @override
+  String get profileEditorDevicesExplanation =>
+      'Deseleziona un dispositivo per rimuoverlo da questo profilo.';
+
+  @override
+  String get profileEditorAllowanceSection => 'Tempo giornaliero';
+
+  @override
+  String get profileEditorAllowanceExplanation =>
+      'Il tempo è cumulativo tra i dispositivi del profilo. Usa 0 per renderlo illimitato.';
+
+  @override
+  String get profileEditorBedtimeSection => 'Orario di riposo';
+
+  @override
+  String get profileEditorBedtimeExplanation =>
+      'Ogni giorno indica la sera in cui inizia l’orario di riposo. Il passaggio oltre mezzanotte è normale.';
+
+  @override
+  String get profileEditorActivitySection => 'Rilevamento attività';
+
+  @override
+  String get profileName => 'Nome profilo';
+
+  @override
+  String get profileNameTooLong => 'Usa al massimo 80 caratteri.';
+
+  @override
+  String get profileEnabled => 'Profilo attivo';
+
+  @override
+  String get allowanceMinutesHelp => 'Minuti · 0 significa illimitato';
+
+  @override
+  String get activityDetection => 'Sensibilità';
+
+  @override
+  String get activityDefault => 'Predefinita del router';
+
+  @override
+  String get activitySensitive => 'Sensibile · 32 KiB/campionamento';
+
+  @override
+  String get activityStandard => 'Standard · 128 KiB/campionamento';
+
+  @override
+  String get activityLowSensitivity => 'Poco sensibile · 256 KiB/campionamento';
+
+  @override
+  String activityCustom(int bytes) {
+    return 'Personalizzata · $bytes byte/campionamento';
+  }
+
+  @override
+  String bedtimeStarts(String time) {
+    return 'Inizia $time';
+  }
+
+  @override
+  String bedtimeEnds(String time) {
+    return 'Termina $time';
+  }
+
+  @override
+  String get applyChanges => 'Applica modifiche';
+
+  @override
+  String get applyingChanges => 'Applicazione sul router…';
+
+  @override
+  String profileEditApplied(String name) {
+    return '$name è stato aggiornato sul router.';
+  }
+
+  @override
+  String get profileEditLoadError =>
+      'Non è stato possibile caricare dal router il profilo modificabile.';
+
+  @override
+  String get profileEditConflict =>
+      'La configurazione del router è cambiata mentre il profilo era aperto. Chiudi l’editor, ricaricalo e applica nuovamente le modifiche.';
+
+  @override
+  String get profileEditValidationError =>
+      'Il router ha rifiutato queste impostazioni. Controlla i valori e riprova.';
+
+  @override
+  String get profileEditApplyError =>
+      'Il router ha ripristinato la configurazione precedente perché non è riuscito ad applicare le nuove regole.';
+
+  @override
+  String get profileEditSessionExpired =>
+      'La sessione del router è scaduta. Prova ad applicare nuovamente le modifiche.';
+
+  @override
+  String get profileEditUnavailable =>
+      'Non è stato possibile confermare il risultato. Aggiorna il profilo prima di riprovare.';
+
+  @override
+  String get discardChangesTitle => 'Scartare le modifiche?';
+
+  @override
+  String get discardChangesBody =>
+      'Questo profilo contiene modifiche non ancora applicate al router.';
+
+  @override
+  String get discardChangesAction => 'Scarta';
+
+  @override
   String get welcomeTitle => 'Il tuo router, direttamente';
 
   @override

@@ -139,6 +139,52 @@
   "@durationMinutes": {
     "placeholders": { "minutes": { "type": "int" } }
   },
+  "editProfileTitle": "Edit profile",
+  "unsavedChanges": "Unsaved changes",
+  "profileEditorProfileSection": "Profile",
+  "profileEditorDevicesSection": "Devices",
+  "profileEditorDevicesExplanation": "Deselect a device to remove it from this profile.",
+  "profileEditorAllowanceSection": "Daily allowance",
+  "profileEditorAllowanceExplanation": "Time is cumulative across the profile devices. Use 0 for unlimited.",
+  "profileEditorBedtimeSection": "Bedtime",
+  "profileEditorBedtimeExplanation": "Each day identifies the evening when bedtime starts. Crossing midnight is normal.",
+  "profileEditorActivitySection": "Activity detection",
+  "profileName": "Profile name",
+  "profileNameTooLong": "Use no more than 80 characters.",
+  "profileEnabled": "Profile enabled",
+  "allowanceMinutesHelp": "Minutes · 0 means unlimited",
+  "activityDetection": "Sensitivity",
+  "activityDefault": "Router default",
+  "activitySensitive": "Sensitive · 32 KiB/sample",
+  "activityStandard": "Standard · 128 KiB/sample",
+  "activityLowSensitivity": "Low sensitivity · 256 KiB/sample",
+  "activityCustom": "Custom · {bytes} bytes/sample",
+  "@activityCustom": {
+    "placeholders": { "bytes": { "type": "int" } }
+  },
+  "bedtimeStarts": "Starts {time}",
+  "@bedtimeStarts": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "bedtimeEnds": "Ends {time}",
+  "@bedtimeEnds": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "applyChanges": "Apply changes",
+  "applyingChanges": "Applying on router…",
+  "profileEditApplied": "{name} updated on the router.",
+  "@profileEditApplied": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "profileEditLoadError": "The editable profile could not be loaded from the router.",
+  "profileEditConflict": "The router configuration changed while this profile was open. Close the editor, reload it and apply your changes again.",
+  "profileEditValidationError": "The router rejected these profile settings. Check the values and try again.",
+  "profileEditApplyError": "The router restored the previous configuration because the new policy could not be applied.",
+  "profileEditSessionExpired": "Your router session expired. Try applying the changes again.",
+  "profileEditUnavailable": "The result could not be confirmed. Refresh the profile before trying again.",
+  "discardChangesTitle": "Discard changes?",
+  "discardChangesBody": "This profile has changes that have not been applied to the router.",
+  "discardChangesAction": "Discard",
   "welcomeTitle": "Your router, directly",
   "welcomeBody": "OWRTPC connects over your local network. No cloud account or remote relay is used.",
   "httpsNotice": "Only secure HTTPS connections are accepted.",

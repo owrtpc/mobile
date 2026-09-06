@@ -6,6 +6,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
 import '../data/profile_details_repository.dart';
+import '../data/profile_editor_repository.dart';
 import '../domain/profile_summary.dart';
 import 'profile_details_screen.dart';
 
@@ -14,6 +15,7 @@ class ProfilesScreen extends StatefulWidget {
     required this.router,
     required this.repository,
     required this.detailsRepository,
+    this.editorRepository,
     this.onSessionExpired,
     super.key,
   });
@@ -21,6 +23,7 @@ class ProfilesScreen extends StatefulWidget {
   final ConnectedRouter router;
   final ProfilesRepository repository;
   final ProfileDetailsRepository detailsRepository;
+  final ProfileEditorRepository? editorRepository;
   final Future<void> Function()? onSessionExpired;
 
   @override
@@ -295,11 +298,13 @@ class _ProfilesScreenState extends State<ProfilesScreen>
         builder: (_) => ProfileDetailsScreen(
           profile: profile,
           repository: widget.detailsRepository,
+          editorRepository: widget.editorRepository,
           routerProvider: () => widget.router,
           onSessionExpired: widget.onSessionExpired,
         ),
       ),
     );
+    if (mounted) await _reload(userInitiated: true);
   }
 
   Future<void> _changeBlocked(ProfileSummary profile) async {

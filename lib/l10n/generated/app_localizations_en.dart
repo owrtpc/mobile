@@ -288,6 +288,126 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get editProfileTitle => 'Edit profile';
+
+  @override
+  String get unsavedChanges => 'Unsaved changes';
+
+  @override
+  String get profileEditorProfileSection => 'Profile';
+
+  @override
+  String get profileEditorDevicesSection => 'Devices';
+
+  @override
+  String get profileEditorDevicesExplanation =>
+      'Deselect a device to remove it from this profile.';
+
+  @override
+  String get profileEditorAllowanceSection => 'Daily allowance';
+
+  @override
+  String get profileEditorAllowanceExplanation =>
+      'Time is cumulative across the profile devices. Use 0 for unlimited.';
+
+  @override
+  String get profileEditorBedtimeSection => 'Bedtime';
+
+  @override
+  String get profileEditorBedtimeExplanation =>
+      'Each day identifies the evening when bedtime starts. Crossing midnight is normal.';
+
+  @override
+  String get profileEditorActivitySection => 'Activity detection';
+
+  @override
+  String get profileName => 'Profile name';
+
+  @override
+  String get profileNameTooLong => 'Use no more than 80 characters.';
+
+  @override
+  String get profileEnabled => 'Profile enabled';
+
+  @override
+  String get allowanceMinutesHelp => 'Minutes · 0 means unlimited';
+
+  @override
+  String get activityDetection => 'Sensitivity';
+
+  @override
+  String get activityDefault => 'Router default';
+
+  @override
+  String get activitySensitive => 'Sensitive · 32 KiB/sample';
+
+  @override
+  String get activityStandard => 'Standard · 128 KiB/sample';
+
+  @override
+  String get activityLowSensitivity => 'Low sensitivity · 256 KiB/sample';
+
+  @override
+  String activityCustom(int bytes) {
+    return 'Custom · $bytes bytes/sample';
+  }
+
+  @override
+  String bedtimeStarts(String time) {
+    return 'Starts $time';
+  }
+
+  @override
+  String bedtimeEnds(String time) {
+    return 'Ends $time';
+  }
+
+  @override
+  String get applyChanges => 'Apply changes';
+
+  @override
+  String get applyingChanges => 'Applying on router…';
+
+  @override
+  String profileEditApplied(String name) {
+    return '$name updated on the router.';
+  }
+
+  @override
+  String get profileEditLoadError =>
+      'The editable profile could not be loaded from the router.';
+
+  @override
+  String get profileEditConflict =>
+      'The router configuration changed while this profile was open. Close the editor, reload it and apply your changes again.';
+
+  @override
+  String get profileEditValidationError =>
+      'The router rejected these profile settings. Check the values and try again.';
+
+  @override
+  String get profileEditApplyError =>
+      'The router restored the previous configuration because the new policy could not be applied.';
+
+  @override
+  String get profileEditSessionExpired =>
+      'Your router session expired. Try applying the changes again.';
+
+  @override
+  String get profileEditUnavailable =>
+      'The result could not be confirmed. Refresh the profile before trying again.';
+
+  @override
+  String get discardChangesTitle => 'Discard changes?';
+
+  @override
+  String get discardChangesBody =>
+      'This profile has changes that have not been applied to the router.';
+
+  @override
+  String get discardChangesAction => 'Discard';
+
+  @override
   String get welcomeTitle => 'Your router, directly';
 
   @override

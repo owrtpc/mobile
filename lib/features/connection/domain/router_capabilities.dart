@@ -22,6 +22,8 @@ class RouterCapabilities {
 
   bool get isCompatible => api == supportedApi && major == supportedMajor;
   bool get supportsSchedulePeriods => features.contains('schedule-periods');
+  bool get supportsProfileEditTransaction =>
+      features.contains('profile-edit-transaction');
 
   factory RouterCapabilities.fromJson(Map<String, Object?> json) {
     final api = json['api'];

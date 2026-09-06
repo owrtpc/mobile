@@ -6,8 +6,8 @@
     {
       "api": "owrtpc-mobile",
       "major": 1,
-      "minor": 2,
-      "backend_version": "0.1.0-r3",
+      "minor": 3,
+      "backend_version": "0.1.0-r4",
       "features": [
         "profiles.read",
         "profiles.write",
@@ -15,7 +15,8 @@
         "device-discovery",
         "uci-apply-confirm",
         "schedule-periods",
-        "device-usage"
+        "device-usage",
+        "profile-edit-transaction"
       ],
       "router_date": "2026-08-28",
       "router_timezone": "Europe/Rome"

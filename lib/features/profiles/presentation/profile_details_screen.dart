@@ -6,20 +6,26 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
 import '../data/profile_details_repository.dart';
+import '../data/profile_editor_repository.dart';
 import '../domain/profile_details.dart';
+import '../domain/profile_draft.dart';
+import '../domain/profile_edit_session.dart';
 import '../domain/profile_summary.dart';
+import 'profile_editor_screen.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
   const ProfileDetailsScreen({
     required this.profile,
     required this.repository,
     required this.routerProvider,
+    this.editorRepository,
     this.onSessionExpired,
     super.key,
   });
 
   final ProfileSummary profile;
   final ProfileDetailsRepository repository;
+  final ProfileEditorRepository? editorRepository;
   final ConnectedRouter Function() routerProvider;
   final Future<void> Function()? onSessionExpired;
 
@@ -32,6 +38,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   Object? _error;
   bool _loading = true;
   bool _refreshing = false;
+  bool _openingEditor = false;
+
+  bool get _supportsEditing {
+    final router = widget.routerProvider();
+    return widget.editorRepository != null &&
+        router.canWrite &&
+        router.capabilities.supportsProfileEditTransaction;
+  }
 
   @override
   void initState() {
@@ -85,8 +99,22 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     final strings = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.profile.name),
+        title: Text(_details?.summary.name ?? widget.profile.name),
         actions: [
+          if (_supportsEditing)
+            IconButton(
+              key: const Key('profile-details-edit'),
+              tooltip: strings.editProfileTitle,
+              onPressed: _details == null || _refreshing || _openingEditor
+                  ? null
+                  : _openEditor,
+              icon: _openingEditor
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.edit_rounded),
+            ),
           IconButton(
             key: const Key('profile-details-refresh'),
             tooltip: strings.refreshProfileDetailsTooltip,
@@ -101,6 +129,82 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         ],
       ),
       body: _buildBody(strings),
+    );
+  }
+
+  Future<void> _openEditor({bool recoverSession = true}) async {
+    final details = _details;
+    final repository = widget.editorRepository;
+    if (details == null || repository == null || _openingEditor) return;
+    setState(() => _openingEditor = true);
+    try {
+      final session = await repository.load(
+        widget.routerProvider(),
+        widget.profile.section,
+        currentDetails: details,
+      );
+      if (!mounted) return;
+      final applied = await Navigator.of(context).push<ProfileDraft>(
+        MaterialPageRoute(
+          builder: (_) => ProfileEditorScreen(
+            session: session,
+            onApply: (draft) => _apply(repository, session, draft),
+          ),
+        ),
+      );
+      if (!mounted || applied == null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).profileEditApplied(applied.name),
+          ),
+        ),
+      );
+      await _load();
+    } on ProfilesSessionExpiredException {
+      if (recoverSession && widget.onSessionExpired != null) {
+        await widget.onSessionExpired!.call();
+        if (mounted) {
+          setState(() => _openingEditor = false);
+          await _openEditor(recoverSession: false);
+        }
+        return;
+      }
+      if (mounted) _showEditLoadError();
+    } on Object {
+      if (mounted) _showEditLoadError();
+    } finally {
+      if (mounted) setState(() => _openingEditor = false);
+    }
+  }
+
+  Future<void> _apply(
+    ProfileEditorRepository repository,
+    ProfileEditSession session,
+    ProfileDraft draft, {
+    bool recoverSession = true,
+  }) async {
+    try {
+      await repository.apply(widget.routerProvider(), session, draft);
+    } on ProfilesSessionExpiredException {
+      if (recoverSession && widget.onSessionExpired != null) {
+        await widget.onSessionExpired!.call();
+        await _apply(repository, session, draft, recoverSession: false);
+        return;
+      }
+      throw const ProfileEditException(ProfileEditFailureKind.sessionExpired);
+    } on ProfileEditException {
+      rethrow;
+    } on Object {
+      throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+    }
+  }
+
+  void _showEditLoadError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).profileEditLoadError),
+      ),
     );
   }
 
