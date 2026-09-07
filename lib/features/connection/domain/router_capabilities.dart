@@ -28,6 +28,8 @@ class RouterCapabilities {
       features.contains('profile-create-transaction');
   bool get supportsProfileDeleteTransaction =>
       features.contains('profile-delete-transaction');
+  bool get supportsProfileOrderTransaction =>
+      features.contains('profile-order-transaction');
 
   factory RouterCapabilities.fromJson(Map<String, Object?> json) {
     final api = json['api'];

@@ -87,8 +87,19 @@ profile deletion, with a native iOS or Android confirmation explaining the
 effect on associated devices. Deletion uses the confirmed snapshot revision,
 is submitted once and is reported as successful only after the profile is
 absent from both the committed snapshot and live policy status. Read-only
-accounts and older backends do not expose deletion. Profile reordering remains
-part of M3.
+accounts and older backends do not expose deletion. With API 1.6 and
+`profile-order-transaction`, write-capable users can reorder profiles using
+labelled move-up/down controls and an explicit Apply action. Ordering uses a
+revision-bound local draft, is submitted once and is confirmed only after both
+the committed snapshot and live status match. A conflict or unconfirmed outcome
+requires reopening the screen to load current state before another attempt.
+
+M3 functionality is implemented; physical Android/iOS acceptance remains open.
+See the [tracked release roadmap](https://github.com/owrtpc/core/blob/main/docs/ROADMAP.md)
+and [mobile milestones](https://github.com/owrtpc/mobile/milestones) for M3/M4
+acceptance. Source versions are not proof of public binary distribution: the
+existing GitHub mobile release has no installable APK/IPA, and store delivery
+is still pending.
 
 TLS uses the operating system trust store first. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its

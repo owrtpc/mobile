@@ -7,11 +7,13 @@ import '../../connection/domain/connected_router.dart';
 import '../data/fixture_profiles_repository.dart';
 import '../data/profile_details_repository.dart';
 import '../data/profile_editor_repository.dart';
+import '../data/profile_order_repository.dart';
 import '../domain/profile_draft.dart';
 import '../domain/profile_edit_session.dart';
 import '../domain/profile_summary.dart';
 import 'profile_details_screen.dart';
 import 'profile_editor_screen.dart';
+import 'profile_order_screen.dart';
 
 class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({
@@ -19,6 +21,7 @@ class ProfilesScreen extends StatefulWidget {
     required this.repository,
     required this.detailsRepository,
     this.editorRepository,
+    this.orderRepository,
     this.onSessionExpired,
     super.key,
   });
@@ -27,6 +30,7 @@ class ProfilesScreen extends StatefulWidget {
   final ProfilesRepository repository;
   final ProfileDetailsRepository detailsRepository;
   final ProfileEditorRepository? editorRepository;
+  final ProfileOrderRepository? orderRepository;
   final Future<void> Function()? onSessionExpired;
 
   @override
@@ -47,6 +51,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
   bool _reloadAfterAction = false;
   bool _reloadAfterCurrent = false;
   bool _creatingProfile = false;
+  bool _orderingProfiles = false;
   Timer? _freshnessTimer;
   Future<void>? _refreshFuture;
 
@@ -64,6 +69,11 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       widget.editorRepository != null &&
       widget.router.canWrite &&
       widget.router.capabilities.supportsProfileCreateTransaction;
+
+  bool get _supportsOrdering =>
+      widget.orderRepository != null &&
+      widget.router.canWrite &&
+      widget.router.capabilities.supportsProfileOrderTransaction;
 
   @override
   void initState() {
@@ -202,12 +212,31 @@ class _ProfilesScreenState extends State<ProfilesScreen>
           ],
         ),
         actions: [
+          if (_supportsOrdering)
+            IconButton(
+              key: const Key('profiles-order-action'),
+              tooltip: strings.orderProfilesTitle,
+              onPressed:
+                  !_orderingProfiles &&
+                      !_creatingProfile &&
+                      !_refreshing &&
+                      _busyProfile == null &&
+                      _connectionHealthy &&
+                      _isFresh &&
+                      (_profiles?.length ?? 0) > 1
+                  ? _openOrder
+                  : null,
+              icon: const Icon(Icons.swap_vert_rounded),
+            ),
           if (_supportsProfileCreation)
             IconButton(
               key: const Key('profiles-create-action'),
               tooltip: strings.createProfileTitle,
               onPressed:
-                  _busyProfile == null && !_refreshing && !_creatingProfile
+                  _busyProfile == null &&
+                      !_refreshing &&
+                      !_creatingProfile &&
+                      !_orderingProfiles
                   ? _openCreate
                   : null,
               icon: _creatingProfile
@@ -220,7 +249,8 @@ class _ProfilesScreenState extends State<ProfilesScreen>
           IconButton(
             key: const Key('profiles-refresh-action'),
             tooltip: strings.refreshTooltip,
-            onPressed: _busyProfile == null && !_refreshing
+            onPressed:
+                _busyProfile == null && !_refreshing && !_orderingProfiles
                 ? () => _reload(userInitiated: true)
                 : null,
             icon: _refreshing
@@ -274,7 +304,8 @@ class _ProfilesScreenState extends State<ProfilesScreen>
     }
 
     final dataIsFresh = _connectionHealthy && _loadError == null && _isFresh;
-    final actionsEnabled = dataIsFresh && _busyProfile == null;
+    final actionsEnabled =
+        dataIsFresh && _busyProfile == null && !_orderingProfiles;
     return RefreshIndicator(
       onRefresh: () => _reload(userInitiated: true),
       child: ListView(
@@ -317,6 +348,7 @@ class _ProfilesScreenState extends State<ProfilesScreen>
   }
 
   Future<void> _openDetails(ProfileSummary profile) async {
+    if (_orderingProfiles) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => ProfileDetailsScreen(
@@ -329,6 +361,45 @@ class _ProfilesScreenState extends State<ProfilesScreen>
       ),
     );
     if (mounted) await _reload(userInitiated: true);
+  }
+
+  Future<void> _openOrder() async {
+    final repository = widget.orderRepository;
+    if (repository == null || _orderingProfiles || !_supportsOrdering) return;
+    // Keep this draft bound to the router/session that supplied its revision.
+    final router = widget.router;
+    setState(() => _orderingProfiles = true);
+    try {
+      final session = await repository.load(router);
+      if (!mounted) return;
+      final applied = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => ProfileOrderScreen(
+            session: session,
+            onApply: (order) => repository.apply(router, session, order),
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (applied == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).profileOrderApplied),
+          ),
+        );
+      }
+      await _reload(userInitiated: true);
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).profileOrderLoadError),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _orderingProfiles = false);
+    }
   }
 
   Future<void> _openCreate({bool recoverSession = true}) async {

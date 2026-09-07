@@ -6,6 +6,7 @@ import '../connection/domain/connected_router.dart';
 import '../profiles/data/fixture_profiles_repository.dart';
 import '../profiles/data/profile_details_repository.dart';
 import '../profiles/data/profile_editor_repository.dart';
+import '../profiles/data/profile_order_repository.dart';
 import '../profiles/presentation/profiles_screen.dart';
 import '../settings/presentation/settings_screen.dart';
 
@@ -18,6 +19,7 @@ class AppShell extends StatefulWidget {
     required this.profileEditorRepository,
     required this.onSessionExpired,
     required this.onSignOut,
+    this.profileOrderRepository,
     super.key,
   });
 
@@ -26,6 +28,7 @@ class AppShell extends StatefulWidget {
   final ProfilesRepository profilesRepository;
   final ProfileDetailsRepository profileDetailsRepository;
   final ProfileEditorRepository? profileEditorRepository;
+  final ProfileOrderRepository? profileOrderRepository;
   final Future<void> Function() onSessionExpired;
   final Future<void> Function() onSignOut;
 
@@ -45,6 +48,7 @@ class _AppShellState extends State<AppShell> {
         repository: widget.profilesRepository,
         detailsRepository: widget.profileDetailsRepository,
         editorRepository: widget.profileEditorRepository,
+        orderRepository: widget.profileOrderRepository,
         onSessionExpired: widget.onSessionExpired,
       ),
       SettingsScreen(

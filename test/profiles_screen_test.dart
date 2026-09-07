@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
+import 'package:owrtpc_mobile/features/connection/domain/router_capabilities.dart';
 import 'package:owrtpc_mobile/features/profiles/data/fixture_profiles_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/data/profile_details_repository.dart';
 import 'package:owrtpc_mobile/features/profiles/data/profile_editor_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/data/profile_order_repository.dart';
+import 'package:owrtpc_mobile/features/profiles/domain/profile_order_session.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_details.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_draft.dart';
 import 'package:owrtpc_mobile/features/profiles/domain/profile_edit_session.dart';
@@ -12,6 +15,65 @@ import 'package:owrtpc_mobile/features/profiles/presentation/profiles_screen.dar
 import 'package:owrtpc_mobile/l10n/generated/app_localizations.dart';
 
 void main() {
+  testWidgets('hides ordering for read-only accounts and older backends', (
+    tester,
+  ) async {
+    final repository = _FakeProfilesRepository([_allowedProfile]);
+    for (final router in [_previewRouter, _writableRouter]) {
+      await _pumpScreen(
+        tester,
+        repository,
+        router: router,
+        orderRepository: _FakeOrderRepository(),
+      );
+      expect(find.byKey(const Key('profiles-order-action')), findsNothing);
+    }
+  });
+
+  testWidgets('loads the current ordering draft from a compatible router', (
+    tester,
+  ) async {
+    final orderRepository = _FakeOrderRepository();
+    final router = ConnectedRouter(
+      endpoint: _writableRouter.endpoint,
+      username: 'writer',
+      sessionToken: 'session',
+      canWrite: true,
+      capabilities: const RouterCapabilities(
+        api: 'owrtpc-mobile',
+        major: 1,
+        minor: 6,
+        backendVersion: '0.4.0-r3',
+        features: {'profile-order-transaction'},
+        routerDate: '2026-09-07',
+        routerTimezone: 'Europe/Rome',
+      ),
+    );
+    final parents = ProfileSummary(
+      section: 'parents',
+      name: 'Parents',
+      state: ProfileState.allowed,
+      usedSeconds: 0,
+      allowanceSeconds: 0,
+      deviceCount: 0,
+      enabled: true,
+      manualBlocked: false,
+      bonusSeconds: 0,
+      allDay: false,
+    );
+    await _pumpScreen(
+      tester,
+      _FakeProfilesRepository([_allowedProfile, parents]),
+      router: router,
+      orderRepository: orderRepository,
+    );
+    await tester.tap(find.byKey(const Key('profiles-order-action')));
+    await tester.pumpAndSettle();
+    expect(orderRepository.loadCalls, 1);
+    expect(find.text('Children · 1 of 2'), findsOneWidget);
+    expect(find.text('Parents · 2 of 2'), findsOneWidget);
+  });
+
   testWidgets('confirms blocking, updates the card and exposes semantics', (
     tester,
   ) async {
@@ -272,6 +334,8 @@ Future<void> _pumpScreen(
   Locale locale = const Locale('en'),
   Future<void> Function()? onSessionExpired,
   ProfileEditorRepository? editorRepository,
+  ProfileOrderRepository? orderRepository,
+  ConnectedRouter? router,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -279,15 +343,40 @@ Future<void> _pumpScreen(
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: ProfilesScreen(
-        router: _writableRouter,
+        router: router ?? _writableRouter,
         repository: repository,
         detailsRepository: const FixtureProfileDetailsRepository(),
         editorRepository: editorRepository,
+        orderRepository: orderRepository,
         onSessionExpired: onSessionExpired,
       ),
     ),
   );
   await tester.pumpAndSettle();
+}
+
+class _FakeOrderRepository implements ProfileOrderRepository {
+  int loadCalls = 0;
+
+  @override
+  Future<ProfileOrderSession> load(ConnectedRouter router) async {
+    loadCalls++;
+    return ProfileOrderSession(
+      revision:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      profiles: const [
+        ProfileOrderEntry(section: 'children', name: 'Children'),
+        ProfileOrderEntry(section: 'parents', name: 'Parents'),
+      ],
+    );
+  }
+
+  @override
+  Future<void> apply(
+    ConnectedRouter router,
+    ProfileOrderSession session,
+    List<String> order,
+  ) async {}
 }
 
 class _FakeProfileEditorRepository implements ProfileEditorRepository {

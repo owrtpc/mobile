@@ -1237,6 +1237,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deletion could not be confirmed. Check the refreshed profile list before trying again.'**
   String get profileDeleteUnknown;
+
+  /// No description provided for @orderProfilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder profiles'**
+  String get orderProfilesTitle;
+
+  /// No description provided for @orderProfilesExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Move profiles up or down, then apply the new order to the router.'**
+  String get orderProfilesExplanation;
+
+  /// No description provided for @moveProfileUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get moveProfileUp;
+
+  /// No description provided for @moveProfileDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get moveProfileDown;
+
+  /// No description provided for @profileOrderPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {position} of {total}'**
+  String profileOrderPosition(String name, int position, int total);
+
+  /// No description provided for @profileOrderConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The router configuration changed. Close this screen and reopen it to load the current order before trying again.'**
+  String get profileOrderConflict;
+
+  /// No description provided for @profileOrderUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'The new order could not be confirmed. Close this screen and reopen it to check the router before trying again.'**
+  String get profileOrderUnconfirmed;
+
+  /// No description provided for @profileOrderApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile order updated on the router.'**
+  String get profileOrderApplied;
+
+  /// No description provided for @profileOrderLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The profile order could not be loaded. Refresh the connection and try again.'**
+  String get profileOrderLoadError;
+
+  /// No description provided for @discardProfileOrderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your local ordering changes? This does not undo an operation already sent to the router.'**
+  String get discardProfileOrderBody;
 }
 
 class _AppLocalizationsDelegate

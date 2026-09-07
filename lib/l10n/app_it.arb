@@ -221,5 +221,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "orderProfilesTitle": "Riordina profili",
+  "orderProfilesExplanation": "Sposta i profili su o giù, poi applica il nuovo ordine al router.",
+  "moveProfileUp": "Sposta su",
+  "moveProfileDown": "Sposta giù",
+  "profileOrderPosition": "{name} · {position} di {total}",
+  "profileOrderConflict": "La configurazione del router è cambiata. Chiudi questa schermata e riaprila per caricare l’ordine attuale prima di riprovare.",
+  "profileOrderUnconfirmed": "Non è stato possibile confermare il nuovo ordine. Chiudi questa schermata e riaprila per verificare il router prima di riprovare.",
+  "profileOrderApplied": "Ordine dei profili aggiornato sul router.",
+  "profileOrderLoadError": "Non è stato possibile caricare l’ordine dei profili. Aggiorna la connessione e riprova.",
+  "discardProfileOrderBody": "Vuoi scartare le modifiche locali all’ordine? Questo non annulla un’operazione già inviata al router."
 }

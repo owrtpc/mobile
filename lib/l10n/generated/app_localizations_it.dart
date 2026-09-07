@@ -693,4 +693,41 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get profileDeleteUnknown =>
       'Impossibile confermare l’eliminazione. Controlla l’elenco aggiornato dei profili prima di riprovare.';
+
+  @override
+  String get orderProfilesTitle => 'Riordina profili';
+
+  @override
+  String get orderProfilesExplanation =>
+      'Sposta i profili su o giù, poi applica il nuovo ordine al router.';
+
+  @override
+  String get moveProfileUp => 'Sposta su';
+
+  @override
+  String get moveProfileDown => 'Sposta giù';
+
+  @override
+  String profileOrderPosition(String name, int position, int total) {
+    return '$name · $position di $total';
+  }
+
+  @override
+  String get profileOrderConflict =>
+      'La configurazione del router è cambiata. Chiudi questa schermata e riaprila per caricare l’ordine attuale prima di riprovare.';
+
+  @override
+  String get profileOrderUnconfirmed =>
+      'Non è stato possibile confermare il nuovo ordine. Chiudi questa schermata e riaprila per verificare il router prima di riprovare.';
+
+  @override
+  String get profileOrderApplied => 'Ordine dei profili aggiornato sul router.';
+
+  @override
+  String get profileOrderLoadError =>
+      'Non è stato possibile caricare l’ordine dei profili. Aggiorna la connessione e riprova.';
+
+  @override
+  String get discardProfileOrderBody =>
+      'Vuoi scartare le modifiche locali all’ordine? Questo non annulla un’operazione già inviata al router.';
 }

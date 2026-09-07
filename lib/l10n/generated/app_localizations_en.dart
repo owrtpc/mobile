@@ -693,4 +693,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileDeleteUnknown =>
       'Deletion could not be confirmed. Check the refreshed profile list before trying again.';
+
+  @override
+  String get orderProfilesTitle => 'Reorder profiles';
+
+  @override
+  String get orderProfilesExplanation =>
+      'Move profiles up or down, then apply the new order to the router.';
+
+  @override
+  String get moveProfileUp => 'Move up';
+
+  @override
+  String get moveProfileDown => 'Move down';
+
+  @override
+  String profileOrderPosition(String name, int position, int total) {
+    return '$name · $position of $total';
+  }
+
+  @override
+  String get profileOrderConflict =>
+      'The router configuration changed. Close this screen and reopen it to load the current order before trying again.';
+
+  @override
+  String get profileOrderUnconfirmed =>
+      'The new order could not be confirmed. Close this screen and reopen it to check the router before trying again.';
+
+  @override
+  String get profileOrderApplied => 'Profile order updated on the router.';
+
+  @override
+  String get profileOrderLoadError =>
+      'The profile order could not be loaded. Refresh the connection and try again.';
+
+  @override
+  String get discardProfileOrderBody =>
+      'Discard your local ordering changes? This does not undo an operation already sent to the router.';
 }
