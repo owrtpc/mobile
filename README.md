@@ -23,7 +23,8 @@ Docker Desktop on Apple Silicon runs the official Linux x64 Flutter SDK through
 emulation. The named `owrtpc-mobile-pub-cache` volume preserves downloaded Dart
 packages without writing a global SDK or package cache onto the Mac.
 
-Android tooling will be added as a separate pinned Docker image layer. Shared
+Android tooling uses a separate pinned Docker image layer; see
+[Android builds and signing](docs/ANDROID.md). Shared
 Dart code is generated and tested in the container. Compiling, signing and
 running the iOS target requires macOS, Xcode, the matching iOS platform and an
 Apple Development team. Bootstrap the pinned macOS SDK once into the

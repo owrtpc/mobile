@@ -1,4 +1,5 @@
 .dart_tool
+.flutter-sdk
 .git
 .idea
 .metadata
@@ -7,3 +8,9 @@ build
 coverage
 ios/Pods
 **/.DS_Store
+**/*.jks
+**/*.keystore
+**/*.p12
+**/*.pfx
+**/release.properties
+**/key.properties

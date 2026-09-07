@@ -17,3 +17,16 @@ jobs:
         run: docker build --platform linux/amd64 -t owrtpc-mobile-flutter:3.47.2 .
       - name: Check localization, formatting, analysis and tests
         run: ./tool/check.sh
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build pinned Flutter base
+        run: docker build --platform linux/amd64 -t owrtpc-mobile-flutter:3.47.2 .
+      - name: Build Android toolchain
+        run: docker build --platform linux/amd64 -t owrtpc-mobile-android:37-v1 -f docker/android.Dockerfile .
+      - name: Verify release signing safeguards and Android artifacts
+        run: ./tool/android.sh check
+      # Temporary CI-signed APK/AAB files are deliberately never uploaded.

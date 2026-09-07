@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 /.flutter-sdk/
+*.jks
+*.keystore
+*.p12
+*.pfx
+release.properties
 
 # Symbolication related
 app.*.symbols
