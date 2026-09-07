@@ -18,6 +18,8 @@ class ProfileEditException implements Exception {
 }
 
 abstract interface class ProfileEditorRepository {
+  Future<void> delete(ConnectedRouter router, ProfileEditSession session);
+
   Future<ProfileEditSession> load(
     ConnectedRouter router,
     String section, {

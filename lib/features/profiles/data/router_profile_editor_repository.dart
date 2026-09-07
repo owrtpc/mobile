@@ -14,6 +14,64 @@ class RouterProfileEditorRepository implements ProfileEditorRepository {
   final JsonRpcTransport transport;
 
   @override
+  Future<void> delete(
+    ConnectedRouter router,
+    ProfileEditSession session,
+  ) async {
+    final section = session.draft.section;
+    if (session.isCreating || !RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(section)) {
+      throw const ProfileEditException(ProfileEditFailureKind.validation);
+    }
+    // A write is sent once. Even an expired session during verification must
+    // not cause deletion to be replayed with a renewed login.
+    final client = _client(router);
+    try {
+      final payload = await client.call(
+        session: router.sessionToken,
+        object: 'owrtpc',
+        method: 'profile_delete',
+        parameters: {'expected_revision': session.revision, 'section': section},
+      );
+      if (_validateWriteResponse(payload) != section) {
+        throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+      }
+      final verification = await Future.wait([
+        client.call(
+          session: router.sessionToken,
+          object: 'owrtpc',
+          method: 'edit_snapshot',
+        ),
+        client.call(
+          session: router.sessionToken,
+          object: 'owrtpc',
+          method: 'status',
+        ),
+      ]);
+      if (verification[0]['revision'] != payload['revision'] ||
+          !_confirmsAbsence(verification[0], section) ||
+          !_confirmsAbsence(verification[1], section)) {
+        throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+      }
+    } on ProfileEditException {
+      rethrow;
+    } on Object {
+      throw const ProfileEditException(ProfileEditFailureKind.unavailable);
+    }
+  }
+
+  static bool _confirmsAbsence(Map<String, Object?> payload, String section) {
+    final profiles = payload['profiles'];
+    return profiles is List<Object?> &&
+        profiles.every(
+          (item) =>
+              item is Map<String, Object?> &&
+              item['section'] is String &&
+              (item['section']! as String).isNotEmpty &&
+              item['section'] != section,
+        );
+  }
+
+  @override
   Future<ProfileEditSession> load(
     ConnectedRouter router,
     String section, {

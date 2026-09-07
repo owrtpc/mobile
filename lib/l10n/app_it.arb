@@ -198,5 +198,28 @@
   "twoHours": "2 h",
   "oneHourTwenty": "1 h 20 min",
   "fortyMinutes": "40 min",
-  "thirtyMinutes": "30 min"
+  "thirtyMinutes": "30 min",
+  "deleteProfileTitle": "Elimina profilo",
+  "deleteProfileConfirmation": "Eliminare “{name}”? I dispositivi associati ({count}) non saranno più controllati da questo profilo e saranno disponibili per una nuova assegnazione. L’operazione non può essere annullata.",
+  "profileDeleting": "Eliminazione in corso…",
+  "profileDeleted": "“{name}” eliminato.",
+  "profileDeleteConflict": "La configurazione del router è cambiata. Controlla il profilo aggiornato prima di eliminarlo.",
+  "profileDeleteUnknown": "Impossibile confermare l’eliminazione. Controlla l’elenco aggiornato dei profili prima di riprovare.",
+  "@deleteProfileConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

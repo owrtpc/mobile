@@ -10,6 +10,119 @@ const _revisionB =
     'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 
 void main() {
+  test(
+    'deletes once and verifies snapshot and live status including last profile',
+    () async {
+      final transport = _ScriptedTransport([
+        ..._loadResponses(_snapshotResponse()),
+        _rpcPayload({
+          'success': true,
+          'section': 'children',
+          'revision': _revisionB,
+        }),
+        _rpcPayload({'revision': _revisionB, 'profiles': []}),
+        _rpcPayload({'profiles': []}),
+      ]);
+      final repository = RouterProfileEditorRepository(transport: transport);
+      final router = ConnectedRouter.preview();
+      final session = await repository.load(router, 'children');
+      await repository.delete(router, session);
+      expect(transport.methods.sublist(4), [
+        'profile_delete',
+        'edit_snapshot',
+        'status',
+      ]);
+      expect(transport.parameters[4], {
+        'expected_revision': _revisionA,
+        'section': 'children',
+      });
+    },
+  );
+
+  for (final scenario in [
+    'conflict',
+    'rollback',
+    'timeout',
+    'wrong section',
+    'snapshot present',
+    'status present',
+    'malformed status',
+    'changed revision',
+    'expired verification',
+  ]) {
+    test('deletion does not retry or claim success after $scenario', () async {
+      final rejected = scenario == 'conflict' || scenario == 'rollback';
+      final transport = _ScriptedTransport([
+        ..._loadResponses(_snapshotResponse()),
+        if (scenario != 'timeout')
+          _rpcPayload(
+            rejected
+                ? {
+                    'success': false,
+                    'code': scenario == 'conflict'
+                        ? 'conflicting_edit'
+                        : 'apply_failed',
+                  }
+                : {
+                    'success': true,
+                    'section': scenario == 'wrong section'
+                        ? 'parents'
+                        : 'children',
+                    'revision': _revisionB,
+                  },
+          ),
+        if (!rejected &&
+            scenario != 'timeout' &&
+            scenario != 'wrong section') ...[
+          scenario == 'snapshot present'
+              ? _snapshotResponse(revision: _revisionB)
+              : _rpcPayload({
+                  'revision': scenario == 'changed revision'
+                      ? _revisionA
+                      : _revisionB,
+                  'profiles': [],
+                }),
+          if (scenario == 'expired verification')
+            {
+              'jsonrpc': '2.0',
+              'result': [6],
+            }
+          else
+            _rpcPayload({
+              'profiles': scenario == 'malformed status'
+                  ? [null]
+                  : scenario == 'status present'
+                  ? [
+                      {'section': 'children'},
+                    ]
+                  : [],
+            }),
+        ],
+      ]);
+      final repository = RouterProfileEditorRepository(transport: transport);
+      final router = ConnectedRouter.preview();
+      final session = await repository.load(router, 'children');
+      await expectLater(
+        repository.delete(router, session),
+        throwsA(
+          isA<ProfileEditException>().having(
+            (error) => error.kind,
+            'kind',
+            scenario == 'conflict'
+                ? ProfileEditFailureKind.conflict
+                : scenario == 'rollback'
+                ? ProfileEditFailureKind.apply
+                : ProfileEditFailureKind.unavailable,
+          ),
+        ),
+      );
+      expect(
+        transport.methods.where((method) => method == 'profile_delete'),
+        hasLength(1),
+      );
+    });
+  }
+
   test('loads an exact editable snapshot and normalizes devices', () async {
     final transport = _ScriptedTransport(_loadResponses(_snapshotResponse()));
     final repository = RouterProfileEditorRepository(transport: transport);

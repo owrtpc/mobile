@@ -669,4 +669,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get thirtyMinutes => '30m';
+
+  @override
+  String get deleteProfileTitle => 'Delete profile';
+
+  @override
+  String deleteProfileConfirmation(String name, int count) {
+    return 'Delete “$name”? Its associated devices ($count) will no longer be controlled by this profile and will become available for assignment. This cannot be undone.';
+  }
+
+  @override
+  String get profileDeleting => 'Deleting profile…';
+
+  @override
+  String profileDeleted(String name) {
+    return '“$name” deleted.';
+  }
+
+  @override
+  String get profileDeleteConflict =>
+      'The router configuration changed. Review the refreshed profile before deleting it.';
+
+  @override
+  String get profileDeleteUnknown =>
+      'Deletion could not be confirmed. Check the refreshed profile list before trying again.';
 }

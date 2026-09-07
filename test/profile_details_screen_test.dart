@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/features/connection/domain/connected_router.dart';
@@ -12,6 +15,136 @@ import 'package:owrtpc_mobile/features/profiles/presentation/profile_details_scr
 import 'package:owrtpc_mobile/l10n/generated/app_localizations.dart';
 
 void main() {
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets('confirms, cancels and deletes once on $platform', (
+      tester,
+    ) async {
+      final editor = _EditorRepository()..deletion = Completer<void>();
+      final router = _deletionRouter();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          locale: const Locale('it'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => ProfileDetailsScreen(
+                      profile: _summary,
+                      repository: const _DetailsRepository(),
+                      editorRepository: editor,
+                      routerProvider: () => router,
+                    ),
+                  ),
+                ),
+                child: const Text('Open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('profile-details-delete')));
+      // The busy indicator is intentionally active while confirmation is open.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        find.byType(
+          platform == TargetPlatform.iOS ? CupertinoAlertDialog : AlertDialog,
+        ),
+        findsOneWidget,
+      );
+      expect(editor.deleteCalls, 0);
+      await tester.tap(find.text('Annulla'));
+      await tester.pumpAndSettle();
+      expect(editor.deleteCalls, 0);
+      await tester.tap(find.byKey(const Key('profile-details-delete')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byKey(const Key('confirm-profile-delete')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(editor.deleteCalls, 1);
+      expect(
+        tester
+            .widget<TextButton>(find.byKey(const Key('profile-details-delete')))
+            .onPressed,
+        isNull,
+      );
+      expect(find.text('“Children” eliminato.'), findsNothing);
+      editor.deletion!.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileDetailsScreen), findsNothing);
+      expect(find.text('“Children” eliminato.'), findsOneWidget);
+    });
+  }
+
+  for (final canWrite in [false, true]) {
+    testWidgets(
+      'hides deletion without ${canWrite ? 'capability' : 'write access'}',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: ProfileDetailsScreen(
+              profile: _summary,
+              repository: const _DetailsRepository(),
+              editorRepository: _EditorRepository(),
+              routerProvider: () => _deletionRouter(
+                canWrite: canWrite,
+                supportsDelete: !canWrite,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('profile-details-delete')), findsNothing);
+      },
+    );
+  }
+
+  testWidgets('conflict refreshes details and never reports deletion', (
+    tester,
+  ) async {
+    final editor = _EditorRepository()
+      ..deletionError = const ProfileEditException(
+        ProfileEditFailureKind.conflict,
+      );
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('it'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ProfileDetailsScreen(
+          profile: _summary,
+          repository: const _DetailsRepository(),
+          editorRepository: editor,
+          routerProvider: _deletionRouter,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('profile-details-delete')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.byKey(const Key('confirm-profile-delete')));
+    await tester.pumpAndSettle();
+    expect(editor.deleteCalls, 1);
+    expect(find.byType(ProfileDetailsScreen), findsOneWidget);
+    expect(
+      find.text(
+        'La configurazione del router è cambiata. Controlla il profilo aggiornato prima di eliminarlo.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('“Children” eliminato.'), findsNothing);
+  });
+
   testWidgets('shows live profile, device usage and schedules', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -55,7 +188,7 @@ void main() {
         home: ProfileDetailsScreen(
           profile: _summary,
           repository: const _DetailsRepository(),
-          editorRepository: const _EditorRepository(),
+          editorRepository: _EditorRepository(),
           routerProvider: () => _editingRouter,
         ),
       ),
@@ -107,7 +240,19 @@ class _DetailsRepository implements ProfileDetailsRepository {
 }
 
 class _EditorRepository implements ProfileEditorRepository {
-  const _EditorRepository();
+  int deleteCalls = 0;
+  Completer<void>? deletion;
+  Object? deletionError;
+
+  @override
+  Future<void> delete(
+    ConnectedRouter router,
+    ProfileEditSession session,
+  ) async {
+    deleteCalls++;
+    if (deletionError != null) throw deletionError!;
+    await deletion?.future;
+  }
 
   @override
   Future<ProfileEditSession> load(
@@ -167,4 +312,28 @@ final _editingRouter = ConnectedRouter(
     routerTimezone: 'Europe/Rome',
   ),
   canWrite: true,
+);
+
+ConnectedRouter _deletionRouter({
+  bool canWrite = true,
+  bool supportsDelete = true,
+}) => ConnectedRouter(
+  endpoint: _editingRouter.endpoint,
+  username: 'editor',
+  sessionToken: 'session',
+  canWrite: canWrite,
+  capabilities: RouterCapabilities(
+    api: RouterCapabilities.supportedApi,
+    major: 1,
+    minor: 5,
+    backendVersion: 'development',
+    features: {
+      'profiles.read',
+      'profiles.write',
+      'profile-edit-transaction',
+      if (supportsDelete) 'profile-delete-transaction',
+    },
+    routerDate: '2026-09-07',
+    routerTimezone: 'Europe/Rome',
+  ),
 );

@@ -669,4 +669,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get thirtyMinutes => '30 min';
+
+  @override
+  String get deleteProfileTitle => 'Elimina profilo';
+
+  @override
+  String deleteProfileConfirmation(String name, int count) {
+    return 'Eliminare “$name”? I dispositivi associati ($count) non saranno più controllati da questo profilo e saranno disponibili per una nuova assegnazione. L’operazione non può essere annullata.';
+  }
+
+  @override
+  String get profileDeleting => 'Eliminazione in corso…';
+
+  @override
+  String profileDeleted(String name) {
+    return '“$name” eliminato.';
+  }
+
+  @override
+  String get profileDeleteConflict =>
+      'La configurazione del router è cambiata. Controlla il profilo aggiornato prima di eliminarlo.';
+
+  @override
+  String get profileDeleteUnknown =>
+      'Impossibile confermare l’eliminazione. Controlla l’elenco aggiornato dei profili prima di riprovare.';
 }

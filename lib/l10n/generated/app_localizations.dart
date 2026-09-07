@@ -1201,6 +1201,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'30m'**
   String get thirtyMinutes;
+
+  /// No description provided for @deleteProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete profile'**
+  String get deleteProfileTitle;
+
+  /// No description provided for @deleteProfileConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”? Its associated devices ({count}) will no longer be controlled by this profile and will become available for assignment. This cannot be undone.'**
+  String deleteProfileConfirmation(String name, int count);
+
+  /// No description provided for @profileDeleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting profile…'**
+  String get profileDeleting;
+
+  /// No description provided for @profileDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” deleted.'**
+  String profileDeleted(String name);
+
+  /// No description provided for @profileDeleteConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The router configuration changed. Review the refreshed profile before deleting it.'**
+  String get profileDeleteConflict;
+
+  /// No description provided for @profileDeleteUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion could not be confirmed. Check the refreshed profile list before trying again.'**
+  String get profileDeleteUnknown;
 }
 
 class _AppLocalizationsDelegate

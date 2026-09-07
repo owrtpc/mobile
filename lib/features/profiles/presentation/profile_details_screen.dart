@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -39,6 +40,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   bool _loading = true;
   bool _refreshing = false;
   bool _openingEditor = false;
+  bool _deleting = false;
+
+  bool get _supportsDeletion {
+    final router = widget.routerProvider();
+    return widget.editorRepository != null &&
+        router.canWrite &&
+        router.capabilities.supportsProfileDeleteTransaction;
+  }
 
   bool get _supportsEditing {
     final router = widget.routerProvider();
@@ -54,7 +63,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   }
 
   Future<void> _load({bool recoverSession = true}) async {
-    if (_refreshing) return;
+    if (_refreshing || _deleting) return;
     setState(() {
       _refreshing = true;
       _error = null;
@@ -97,39 +106,151 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_details?.summary.name ?? widget.profile.name),
-        actions: [
-          if (_supportsEditing)
+    return PopScope(
+      canPop: !_deleting,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_details?.summary.name ?? widget.profile.name),
+          actions: [
+            if (_supportsEditing)
+              IconButton(
+                key: const Key('profile-details-edit'),
+                tooltip: strings.editProfileTitle,
+                onPressed:
+                    _details == null ||
+                        _refreshing ||
+                        _openingEditor ||
+                        _deleting ||
+                        _error != null
+                    ? null
+                    : _openEditor,
+                icon: _openingEditor
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.edit_rounded),
+              ),
             IconButton(
-              key: const Key('profile-details-edit'),
-              tooltip: strings.editProfileTitle,
-              onPressed: _details == null || _refreshing || _openingEditor
+              key: const Key('profile-details-refresh'),
+              tooltip: strings.refreshProfileDetailsTooltip,
+              onPressed: _refreshing || _deleting || _openingEditor
                   ? null
-                  : _openEditor,
-              icon: _openingEditor
+                  : _load,
+              icon: _refreshing
                   ? const SizedBox.square(
                       dimension: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.edit_rounded),
+                  : const Icon(Icons.refresh_rounded),
             ),
-          IconButton(
-            key: const Key('profile-details-refresh'),
-            tooltip: strings.refreshProfileDetailsTooltip,
-            onPressed: _refreshing ? null : _load,
-            icon: _refreshing
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.refresh_rounded),
-          ),
-        ],
+          ],
+        ),
+        body: _buildBody(strings),
       ),
-      body: _buildBody(strings),
     );
+  }
+
+  Future<void> _delete() async {
+    final repository = widget.editorRepository;
+    if (repository == null ||
+        _deleting ||
+        _refreshing ||
+        _openingEditor ||
+        !_supportsDeletion) {
+      return;
+    }
+    setState(() => _deleting = true);
+    var submitted = false;
+    try {
+      final session = await repository.load(
+        widget.routerProvider(),
+        widget.profile.section,
+        currentDetails: _details,
+      );
+      if (!mounted) return;
+      final strings = AppLocalizations.of(context);
+      final confirmed =
+          await showAdaptiveDialog<bool>(
+            context: context,
+            builder: (context) {
+              final title = Text(strings.deleteProfileTitle);
+              final content = Text(
+                strings.deleteProfileConfirmation(
+                  session.draft.name,
+                  session.draft.devices.length,
+                ),
+              );
+              if (Theme.of(context).platform == TargetPlatform.iOS) {
+                return CupertinoAlertDialog(
+                  title: title,
+                  content: content,
+                  actions: [
+                    CupertinoDialogAction(
+                      isDefaultAction: true,
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(strings.cancelAction),
+                    ),
+                    CupertinoDialogAction(
+                      key: const Key('confirm-profile-delete'),
+                      isDestructiveAction: true,
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(strings.deleteProfileTitle),
+                    ),
+                  ],
+                );
+              }
+              return AlertDialog(
+                title: title,
+                content: content,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(strings.cancelAction),
+                  ),
+                  FilledButton(
+                    key: const Key('confirm-profile-delete'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
+                    ),
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(strings.deleteProfileTitle),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
+      if (!confirmed || !mounted) return;
+      submitted = true;
+      await repository.delete(widget.routerProvider(), session);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.profileDeleted(session.draft.name))),
+      );
+      Navigator.of(context).pop();
+    } on Object catch (error) {
+      if (!mounted) return;
+      final strings = AppLocalizations.of(context);
+      final message = !submitted
+          ? strings.profileEditLoadError
+          : switch (error) {
+              ProfileEditException(kind: ProfileEditFailureKind.conflict) =>
+                strings.profileDeleteConflict,
+              ProfileEditException(kind: ProfileEditFailureKind.apply) =>
+                strings.profileEditApplyError,
+              _ => strings.profileDeleteUnknown,
+            };
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+      if (submitted) {
+        setState(() => _deleting = false);
+        await _load();
+      }
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   Future<void> _openEditor({bool recoverSession = true}) async {
@@ -256,6 +377,33 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           if (_error != null) ...[
             _DetailsNotice(label: strings.profileDetailsRefreshError),
             const SizedBox(height: 12),
+          ],
+          if (_supportsDeletion) ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: const Key('profile-details-delete'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                onPressed:
+                    _deleting || _refreshing || _openingEditor || _error != null
+                    ? null
+                    : _delete,
+                icon: _deleting
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.delete_outline_rounded),
+                label: Text(
+                  _deleting
+                      ? strings.profileDeleting
+                      : strings.deleteProfileTitle,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
           _TodayCard(details: details),
           const SizedBox(height: 20),

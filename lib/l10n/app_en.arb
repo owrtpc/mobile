@@ -289,5 +289,28 @@
   "twoHours": "2h",
   "oneHourTwenty": "1h 20m",
   "fortyMinutes": "40m",
-  "thirtyMinutes": "30m"
+  "thirtyMinutes": "30m",
+  "deleteProfileTitle": "Delete profile",
+  "deleteProfileConfirmation": "Delete “{name}”? Its associated devices ({count}) will no longer be controlled by this profile and will become available for assignment. This cannot be undone.",
+  "profileDeleting": "Deleting profile…",
+  "profileDeleted": "“{name}” deleted.",
+  "profileDeleteConflict": "The router configuration changed. Review the refreshed profile before deleting it.",
+  "profileDeleteUnknown": "Deletion could not be confirmed. Check the refreshed profile list before trying again.",
+  "@deleteProfileConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

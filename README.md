@@ -82,7 +82,13 @@ the committed snapshot and live policy state before reporting success. With API
 1.4 and `profile-create-transaction`, users can also create profiles and assign
 unassigned devices discovered by the router. Devices already owned by another
 profile remain visible but unavailable, preserving exclusive assignment.
-Profile deletion remains part of M3.
+With API 1.5 and `profile-delete-transaction`, the detail screen also offers
+profile deletion, with a native iOS or Android confirmation explaining the
+effect on associated devices. Deletion uses the confirmed snapshot revision,
+is submitted once and is reported as successful only after the profile is
+absent from both the committed snapshot and live policy status. Read-only
+accounts and older backends do not expose deletion. Profile reordering remains
+part of M3.
 
 TLS uses the operating system trust store first. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its

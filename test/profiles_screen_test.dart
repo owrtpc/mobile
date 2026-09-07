@@ -291,6 +291,10 @@ Future<void> _pumpScreen(
 }
 
 class _FakeProfileEditorRepository implements ProfileEditorRepository {
+  @override
+  Future<void> delete(ConnectedRouter router, ProfileEditSession session) =>
+      throw UnimplementedError();
+
   int createCalls = 0;
   ProfileDraft? lastCreated;
 
