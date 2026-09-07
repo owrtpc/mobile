@@ -104,7 +104,7 @@ void main() {
     final removeButton = tester.widget<IconButton>(removeDevice);
     expect(
       removeButton.color,
-      Theme.of(tester.element(removeDevice)).colorScheme.primary,
+      Theme.of(tester.element(removeDevice)).colorScheme.error,
     );
     await tester.tap(removeDevice);
     await tester.pump();
