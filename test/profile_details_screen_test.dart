@@ -71,7 +71,7 @@ void main() {
       expect(editor.deleteCalls, 1);
       expect(
         tester
-            .widget<TextButton>(find.byKey(const Key('profile-details-delete')))
+            .widget<IconButton>(find.byKey(const Key('profile-details-delete')))
             .onPressed,
         isNull,
       );

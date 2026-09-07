@@ -131,6 +131,28 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       )
                     : const Icon(Icons.edit_rounded),
               ),
+            if (_supportsDeletion)
+              IconButton(
+                key: const Key('profile-details-delete'),
+                tooltip: _deleting
+                    ? strings.profileDeleting
+                    : strings.deleteProfileTitle,
+                color: Theme.of(context).colorScheme.error,
+                onPressed:
+                    _details == null ||
+                        _deleting ||
+                        _refreshing ||
+                        _openingEditor ||
+                        _error != null
+                    ? null
+                    : _delete,
+                icon: _deleting
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.delete_outline_rounded),
+              ),
             IconButton(
               key: const Key('profile-details-refresh'),
               tooltip: strings.refreshProfileDetailsTooltip,
@@ -377,33 +399,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           if (_error != null) ...[
             _DetailsNotice(label: strings.profileDetailsRefreshError),
             const SizedBox(height: 12),
-          ],
-          if (_supportsDeletion) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                key: const Key('profile-details-delete'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                onPressed:
-                    _deleting || _refreshing || _openingEditor || _error != null
-                    ? null
-                    : _delete,
-                icon: _deleting
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.delete_outline_rounded),
-                label: Text(
-                  _deleting
-                      ? strings.profileDeleting
-                      : strings.deleteProfileTitle,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
           ],
           _TodayCard(details: details),
           const SizedBox(height: 20),
