@@ -131,6 +131,19 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       )
                     : const Icon(Icons.edit_rounded),
               ),
+            IconButton(
+              key: const Key('profile-details-refresh'),
+              tooltip: strings.refreshProfileDetailsTooltip,
+              onPressed: _refreshing || _deleting || _openingEditor
+                  ? null
+                  : _load,
+              icon: _refreshing
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded),
+            ),
             if (_supportsDeletion)
               IconButton(
                 key: const Key('profile-details-delete'),
@@ -153,19 +166,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       )
                     : const Icon(Icons.delete_outline_rounded),
               ),
-            IconButton(
-              key: const Key('profile-details-refresh'),
-              tooltip: strings.refreshProfileDetailsTooltip,
-              onPressed: _refreshing || _deleting || _openingEditor
-                  ? null
-                  : _load,
-              icon: _refreshing
-                  ? const SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded),
-            ),
           ],
         ),
         body: _buildBody(strings),
