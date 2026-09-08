@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../core/network/bounded_response.dart';
 import '../domain/router_endpoint.dart';
 
 typedef RouterEndpointProbe = Future<bool> Function(Uri endpoint);
@@ -52,6 +53,7 @@ class RouterEndpointResolver {
     try {
       const requestId = 1;
       final request = await client.postUrl(endpoint).timeout(timeout);
+      request.followRedirects = false;
       request.headers.contentType = ContentType.json;
       request.write(
         jsonEncode({
@@ -68,13 +70,12 @@ class RouterEndpointResolver {
       );
       final response = await request.close().timeout(timeout);
       if (response.statusCode != HttpStatus.ok) {
-        await response.drain<void>();
         return false;
       }
-      final bytes = await response
-          .timeout(timeout)
-          .fold<List<int>>(<int>[], (buffer, chunk) => buffer..addAll(chunk));
-      if (bytes.length > 64 * 1024) return false;
+      final bytes = await readBoundedResponse(
+        response,
+        64 * 1024,
+      ).timeout(timeout);
       final decoded = jsonDecode(utf8.decode(bytes));
       return decoded is Map<String, Object?> &&
           decoded['jsonrpc'] == '2.0' &&

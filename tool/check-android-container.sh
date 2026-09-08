@@ -49,3 +49,4 @@ bundle_signer=$(keytool -printcert -jarfile build/app/outputs/bundle/release/app
 [ "$bundle_signer" = "$expected_signer" ]
 echo 'PASS: unsigned release refusal, temporary signed APK/AAB, package identity and version metadata'
 echo 'TEST ARTIFACTS ONLY: do not distribute or install as normal user updates'
+(cd android && ./gradlew --no-daemon -I ../tool/dependency-inventory.gradle :app:owrtpcDependencyInventory)

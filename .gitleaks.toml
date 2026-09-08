@@ -1,0 +1,8 @@
+title = "OWRTPC secret scanning"
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "One deterministic fake ubus session used by widget fixtures"
+regexTarget = "secret"
+regexes = ['''^0123456789abcdef0123456789abcdef$''']

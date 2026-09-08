@@ -102,10 +102,13 @@ acceptance. Source versions are not proof of public binary distribution: the
 existing GitHub mobile release has no installable APK/IPA, and store delivery
 is still pending.
 
-TLS uses the operating system trust store first. An unknown self-signed
+Unpaired endpoints use the operating system trust store. An unknown self-signed
 certificate is inspected without sending credentials; the app shows its
 SHA-256 fingerprint and pins it for that exact host and port only after explicit
 user comparison. Expired, not-yet-valid and changed certificates remain blocked.
+An existing pin takes precedence over CA trust, and trust changes invalidate
+old pooled connections before the next authenticated request. See the
+[security review](docs/SECURITY_REVIEW.md) for tested boundaries and release gates.
 
 The product and security contract is maintained in the sibling core repository
 at `../core/docs/MOBILE_APP.md`.

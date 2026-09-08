@@ -47,6 +47,10 @@ class CertificateTrust {
   static const _storageKey = 'router_certificate_pins';
 
   final Map<String, String> _pins;
+  int _generation = 0;
+  int get generation => _generation;
+  bool hasPin(String host, int port) =>
+      _pins.containsKey(endpointKey(host, port));
   final Future<void> Function(Map<String, String> pins)? persistPins;
 
   static Future<CertificateTrust> load() async {
@@ -86,8 +90,19 @@ class CertificateTrust {
   }
 
   Future<void> trust(RouterCertificate certificate) async {
-    _pins[certificate.endpointKey] = certificate.fingerprint;
-    await persistPins?.call(Map.unmodifiable(_pins));
+    if (!certificate.isCurrentlyValid ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(certificate.fingerprint)) {
+      throw const FormatException('Invalid certificate pin');
+    }
+    final updated = {
+      ..._pins,
+      certificate.endpointKey: certificate.fingerprint,
+    };
+    await persistPins?.call(Map.unmodifiable(updated));
+    _pins
+      ..clear()
+      ..addAll(updated);
+    _generation++;
   }
 
   bool isPinned(RouterCertificate certificate) =>

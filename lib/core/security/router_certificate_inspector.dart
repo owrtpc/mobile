@@ -14,15 +14,19 @@ class RouterCertificateInspector {
 
   Future<RouterCertificate?> inspect(RouterEndpoint endpoint) async {
     X509Certificate? captured;
-    final client = HttpClient()..connectionTimeout = timeout;
+    // Deliberately reject every certificate during this credential-free probe.
+    // This also exposes a replacement signed by a system-trusted CA for an
+    // explicit fingerprint comparison. No HTTP request body is transmitted.
+    final client = HttpClient(context: SecurityContext(withTrustedRoots: false))
+      ..connectionTimeout = timeout;
     client.badCertificateCallback = (certificate, host, port) {
       captured = certificate;
       return false;
     };
     try {
       final request = await client.getUrl(endpoint.uri).timeout(timeout);
-      final response = await request.close().timeout(timeout);
-      await response.drain<void>();
+      request.followRedirects = false;
+      await request.close().timeout(timeout);
       return null;
     } on HandshakeException {
       final certificate = captured;
