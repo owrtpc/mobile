@@ -116,3 +116,10 @@ at `../core/docs/MOBILE_APP.md`.
 ## Licence
 
 Apache License 2.0. See `LICENSE`.
+
+Settings includes maintainer credits, [@desmofab](https://github.com/desmofab),
+source/licence links and an offline open-source licence sheet.
+OWRTPC is independent and not affiliated with OpenWrt. OpenWrt is a registered
+trademark owned by Software Freedom Conservancy (SFC); see
+[OpenWrt](https://openwrt.org) and its [trademark policy](https://openwrt.org/trademark).
+Naming clarification remains a pre-promotion gate in the core release review.

@@ -335,5 +335,14 @@
         "type": "int"
       }
     }
-  }
+  },
+  "creditsTagline": "Free software. Local control.",
+  "creditsAuthor": "Developed by Fabrizio Pellegrini and OWRTPC contributors.",
+  "creditsThanks": "Thanks to the OpenWrt and LuCI communities.",
+  "creditsIndependent": "Independent project, not affiliated with OpenWrt.",
+  "sourceCode": "Source code",
+  "projectLicence": "Apache-2.0 licence",
+  "openSourceLicences": "Open-source licences",
+  "openLinkError": "Could not open the link. Try again when a browser is available.",
+  "openWrtTrademark": "OpenWrt is a registered trademark of Software Freedom Conservancy (SFC)."
 }

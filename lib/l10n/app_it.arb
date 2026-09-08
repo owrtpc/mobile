@@ -231,5 +231,14 @@
   "profileOrderUnconfirmed": "Non è stato possibile confermare il nuovo ordine. Chiudi questa schermata e riaprila per verificare il router prima di riprovare.",
   "profileOrderApplied": "Ordine dei profili aggiornato sul router.",
   "profileOrderLoadError": "Non è stato possibile caricare l’ordine dei profili. Aggiorna la connessione e riprova.",
-  "discardProfileOrderBody": "Vuoi scartare le modifiche locali all’ordine? Questo non annulla un’operazione già inviata al router."
+  "discardProfileOrderBody": "Vuoi scartare le modifiche locali all’ordine? Questo non annulla un’operazione già inviata al router.",
+  "creditsTagline": "Software libero. Controllo locale.",
+  "creditsAuthor": "Sviluppato da Fabrizio Pellegrini e dai contributori OWRTPC.",
+  "creditsThanks": "Grazie alle comunità OpenWrt e LuCI.",
+  "creditsIndependent": "Progetto indipendente, non affiliato a OpenWrt.",
+  "sourceCode": "Codice sorgente",
+  "projectLicence": "Licenza Apache-2.0",
+  "openSourceLicences": "Licenze open source",
+  "openLinkError": "Impossibile aprire il link. Riprova quando è disponibile un browser.",
+  "openWrtTrademark": "OpenWrt è un marchio registrato di Software Freedom Conservancy (SFC)."
 }

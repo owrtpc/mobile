@@ -1297,6 +1297,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard your local ordering changes? This does not undo an operation already sent to the router.'**
   String get discardProfileOrderBody;
+
+  /// No description provided for @creditsTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Free software. Local control.'**
+  String get creditsTagline;
+
+  /// No description provided for @creditsAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Developed by Fabrizio Pellegrini and OWRTPC contributors.'**
+  String get creditsAuthor;
+
+  /// No description provided for @creditsThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks to the OpenWrt and LuCI communities.'**
+  String get creditsThanks;
+
+  /// No description provided for @creditsIndependent.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent project, not affiliated with OpenWrt.'**
+  String get creditsIndependent;
+
+  /// No description provided for @sourceCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get sourceCode;
+
+  /// No description provided for @projectLicence.
+  ///
+  /// In en, this message translates to:
+  /// **'Apache-2.0 licence'**
+  String get projectLicence;
+
+  /// No description provided for @openSourceLicences.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licences'**
+  String get openSourceLicences;
+
+  /// No description provided for @openLinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. Try again when a browser is available.'**
+  String get openLinkError;
+
+  /// No description provided for @openWrtTrademark.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenWrt is a registered trademark of Software Freedom Conservancy (SFC).'**
+  String get openWrtTrademark;
 }
 
 class _AppLocalizationsDelegate

@@ -730,4 +730,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get discardProfileOrderBody =>
       'Discard your local ordering changes? This does not undo an operation already sent to the router.';
+
+  @override
+  String get creditsTagline => 'Free software. Local control.';
+
+  @override
+  String get creditsAuthor =>
+      'Developed by Fabrizio Pellegrini and OWRTPC contributors.';
+
+  @override
+  String get creditsThanks => 'Thanks to the OpenWrt and LuCI communities.';
+
+  @override
+  String get creditsIndependent =>
+      'Independent project, not affiliated with OpenWrt.';
+
+  @override
+  String get sourceCode => 'Source code';
+
+  @override
+  String get projectLicence => 'Apache-2.0 licence';
+
+  @override
+  String get openSourceLicences => 'Open-source licences';
+
+  @override
+  String get openLinkError =>
+      'Could not open the link. Try again when a browser is available.';
+
+  @override
+  String get openWrtTrademark =>
+      'OpenWrt is a registered trademark of Software Freedom Conservancy (SFC).';
 }

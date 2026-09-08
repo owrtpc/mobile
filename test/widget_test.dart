@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owrtpc_mobile/app/app.dart';
@@ -317,6 +318,66 @@ void main() {
     expect(find.text('Version'), findsOneWidget);
     expect(find.text('0.1.0'), findsOneWidget);
   });
+
+  for (final language in [
+    LanguagePreference.english,
+    LanguagePreference.italian,
+  ]) {
+    testWidgets(
+      'credits licences stay in a dismissible sheet at 200%: $language',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final fixtureName = 'OWRTPC licence fixture ${language.name}';
+        LicenseRegistry.addLicense(
+          () => Stream.value(
+            LicenseEntryWithLineBreaks([fixtureName], 'Fixture licence text.'),
+          ),
+        );
+        await tester.pumpWidget(
+          OwrtpcApp(
+            preferences: AppPreferences(language: language),
+            credentialsStore: credentialsStore,
+            initialRouter: ConnectedRouter.preview(),
+          ),
+        );
+        await tester.tap(find.byIcon(Icons.settings_outlined));
+        await tester.pumpAndSettle();
+        final label = language == LanguagePreference.italian
+            ? 'Licenze open source'
+            : 'Open-source licences';
+        await tester.scrollUntilVisible(find.text(label), 300);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(find.byType(BottomSheet), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text(fixtureName),
+          200,
+          scrollable: find
+              .descendant(
+                of: find.byType(LicensePage),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(fixtureName));
+        await tester.pumpAndSettle();
+        expect(find.text('Fixture licence text.'), findsOneWidget);
+        expect(find.byType(BottomSheet), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle();
+        expect(find.byType(BottomSheet), findsNothing);
+        expect(find.text('@desmofab'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('switches immediately between English and Italian', (
     tester,

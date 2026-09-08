@@ -98,3 +98,48 @@ and [distribution](https://github.com/owrtpc/mobile/issues/6).
 - [Official Android command-line tools and checksums](https://developer.android.com/studio#command-tools)
 - [Android Gradle plugin 9.1 compatibility](https://developer.android.com/build/releases/agp-9-1-0-release-notes)
 - [Sign an Android application](https://developer.android.com/studio/publish/app-signing)
+
+## Native macOS fallback
+
+For local APK delivery on Apple Silicon, `tool/android-macos.sh` uses the pinned
+macOS Flutter SDK already bootstrapped for iOS and isolated Android/JDK/Gradle
+caches under the ignored `.flutter-sdk/android-native/` directory. No system
+SDK, Java installation or global Flutter configuration is changed. Run native
+builds separately from Docker Flutter checks: they share `.dart_tool` and each
+platform's `pub get` must establish its own package paths.
+
+The native setup used for this candidate is:
+
+- Android command-line tools ARM64 build 15859902 from
+  `https://dl.google.com/android/repository/commandlinetools-mac_arm64-15859902_latest.zip`,
+  SHA-256 `835b62a26162b229b441d1f6d4680383815a270809eb33522c0d480fa5002c4e`;
+  extract under `sdk/cmdline-tools/latest`.
+- Temurin 21.0.12.1+1 macOS ARM64 from the official Adoptium release
+  `https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.12.1_1.tar.gz`,
+  SHA-256 `3623232f33a9c3baadf304480b2535f9a3cba8a58d42ecbb438ba267315d9998`;
+  extract under `jdk/`.
+- Install `platforms;android-35`, `platforms;android-36`,
+  `platforms;android-37.0`, `build-tools;36.0.0`, `ndk;28.2.13676358`,
+  `cmake;3.22.1` and `platform-tools` using the official SDK manager.
+  Keep its `--list_installed` output alongside the local build record.
+
+Override tool locations with `OWRTPC_ANDROID_MAC_SDK` and
+`OWRTPC_ANDROID_MAC_JDK` if needed. The same Gradle release-signing refusal and
+source/version/CI checks apply; this fallback does not permit debug or CI-only
+artifacts to be distributed.
+
+```sh
+OWRTPC_ANDROID_SIGNING_DIR=/absolute/private/android-signing-directory \
+  ./tool/android-macos.sh build apk --release
+```
+
+The native output is `build/app/outputs/flutter-apk/app-release.apk`. Verify
+with the SDK's `apksigner` and record the expected signer, SHA-256, version,
+source commit and toolchain before copying it to a versioned delivery filename.
+
+For a private device test, transfer the **mobile** APK to the Android phone and
+open it with its file manager. If requested, allow installation from that source;
+menu wording depends on the Android version/vendor. Launch OWRTPC, connect to
+the router LAN and pair HTTPS by comparing the router certificate fingerprint.
+Check the displayed app version and record the actual device-test results.
+The `.apk` files in `owrtpc/core` are OpenWrt packages, not Android applications.

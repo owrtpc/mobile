@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app_preferences.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -145,10 +146,113 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(strings.creditsTagline),
+                      const SizedBox(height: 8),
+                      Text(strings.creditsAuthor),
+                      Text(strings.creditsThanks),
+                      Wrap(
+                        spacing: 4,
+                        children: [
+                          TextButton(
+                            onPressed: () =>
+                                _openLink('https://github.com/desmofab'),
+                            child: const Text('@desmofab'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                _openLink('https://github.com/owrtpc/mobile'),
+                            child: Text(strings.sourceCode),
+                          ),
+                          TextButton(
+                            onPressed: () => _openLink(
+                              'https://github.com/owrtpc/mobile/blob/main/LICENSE',
+                            ),
+                            child: Text(strings.projectLicence),
+                          ),
+                          TextButton(
+                            onPressed: _showLicences,
+                            child: Text(strings.openSourceLicences),
+                          ),
+                          TextButton(
+                            onPressed: () => _openLink('https://openwrt.org'),
+                            child: const Text('OpenWrt'),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        strings.creditsIndependent,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        strings.openWrtTrademark,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _openLink(String url) async {
+    try {
+      if (await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      )) {
+        return;
+      }
+    } catch (_) {
+      // A missing browser or a platform failure should not leave settings.
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).openLinkError)),
+    );
+  }
+
+  void _showLicences() {
+    final strings = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: 0.9,
+        child: Column(
+          children: [
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: IconButton(
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                onPressed: () => Navigator.of(sheetContext).pop(),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            Expanded(
+              // Keep licence details within the sheet, including their back stack.
+              child: Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (_) => LicensePage(
+                    applicationName: 'OWRTPC',
+                    applicationLegalese: strings.projectLicence,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -222,11 +326,14 @@ class _CyclePreferenceTile extends StatelessWidget {
               Icon(icon),
               const SizedBox(width: 16),
               Expanded(child: Text(title)),
-              Text(
-                value,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
