@@ -761,4 +761,79 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get openWrtTrademark =>
       'OpenWrt è un marchio registrato di Software Freedom Conservancy (SFC).';
+
+  @override
+  String get privacyTitle => 'Privacy';
+
+  @override
+  String get privacyData =>
+      'OWRTPC si collega direttamente tramite HTTPS al router che inserisci. L’app mostra profili, nomi e indirizzi dei dispositivi, orari e utilizzo forniti dal router. Non ci sono account cloud OWRTPC, pubblicità, analytics o invio automatico di segnalazioni di arresto anomalo.';
+
+  @override
+  String get privacyStorage =>
+      'La sessione resta in memoria. Se attivi Ricorda accesso, indirizzo del router, nome utente e password vengono salvati nel Portachiavi iOS vincolato al dispositivo o nell’archivio cifrato Android. Aspetto, lingua e impronte dei certificati associati, con i relativi indirizzi dei router, vengono salvati localmente.';
+
+  @override
+  String get privacyRemoval =>
+      'Esci rimuove l’accesso memorizzato e tenta di terminare la sessione sul router. Se compare un errore di archiviazione, la cancellazione non è confermata. Preferenze e certificati associati restano salvati. Esci prima di disinstallare: gli elementi del Portachiavi iOS possono sopravvivere alla rimozione dell’app. Rimuovere l’app non cancella profili o utilizzo salvati sul router.';
+
+  @override
+  String get privacySharing =>
+      'La diagnostica viene preparata localmente e copiata solo quando scegli Copia diagnostica. Contiene versione e build dell’app, piattaforma, livello di accesso e compatibilità del backend, senza indirizzi, credenziali, profili o log grezzi. Gli appunti di sistema potrebbero essere accessibili ad altre app o sincronizzati dal sistema operativo. I link si aprono nel browser e seguono le regole di privacy del sito; ciò che pubblichi su GitHub viene condiviso con GitHub e, nelle issue pubbliche, con gli altri lettori.';
+
+  @override
+  String get privacyContact =>
+      'Per domande, contatta il manutentore @desmofab tramite il progetto su GitHub. Non pubblicare credenziali o dati personali del router nelle issue. L’informativa online descrive lo stesso trattamento dei dati e rimanda alle segnalazioni private di sicurezza.';
+
+  @override
+  String get privacyOnline => 'Leggi l’informativa privacy online';
+
+  @override
+  String get supportTitle => 'Connessione e supporto';
+
+  @override
+  String get supportConnection =>
+      'Collegati alla rete fidata del router e consenti l’accesso alla rete locale nelle impostazioni del telefono. Inserisci l’indirizzo HTTPS e, se necessario, la porta. Usa un account dedicato a OWRTPC. Non esporre a Internet l’interfaccia di gestione del router.';
+
+  @override
+  String get supportCertificate =>
+      'Per un certificato autofirmato, confronta l’intera impronta SHA-256 con il certificato ottenuto tramite una console fidata del router o una connessione SSH verificata. Dopo un rinnovo intenzionale del certificato, esci, ricollegati e confronta il nuovo certificato prima di associarlo. Fermati se la modifica è inattesa. Controlla data e ora del telefono se il certificato è scaduto o non ancora valido.';
+
+  @override
+  String get supportRecovery =>
+      'Se perdi la connessione durante una modifica, ricollegati e ricarica il profilo per controllare cosa ha salvato il router prima di riprovare. Non reimpostare il router per risolvere un errore di connessione. Le azioni mancanti possono dipendere da un account di sola lettura o da un backend precedente; la guida spiega compatibilità e recupero.';
+
+  @override
+  String get supportReporting =>
+      'Per i problemi ordinari, includi l’anteprima della diagnostica e i passaggi per riprodurli senza dati personali. Controlla gli screenshot prima di condividerli. Segnala le possibili falle di sicurezza privatamente seguendo la policy di sicurezza, non in una issue pubblica.';
+
+  @override
+  String get setupGuide => 'Guida alla configurazione';
+
+  @override
+  String get reportProblem => 'Issue del progetto';
+
+  @override
+  String get securityReporting => 'Policy di sicurezza';
+
+  @override
+  String get diagnosticsTitle => 'Diagnostica';
+
+  @override
+  String get diagnosticsSummary =>
+      'Controlla i dettagli tecnici prima di copiarli';
+
+  @override
+  String get diagnosticsExplanation =>
+      'Il report contiene solo versione e build dell’app, piattaforma, livello di accesso e compatibilità del backend. Le versioni sconosciute sono indicate con null. Esclude indirizzi, account, password, token, impronte dei certificati, profili, dispositivi e log grezzi. Non viene inviato nulla automaticamente. La copia inserisce questo testo negli appunti di sistema.';
+
+  @override
+  String get copyDiagnostics => 'Copia diagnostica';
+
+  @override
+  String get diagnosticsCopied => 'Diagnostica copiata';
+
+  @override
+  String get diagnosticsCopyError =>
+      'Impossibile copiare la diagnostica. Riprova.';
 }

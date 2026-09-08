@@ -4,7 +4,7 @@
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
         android:fullBackupContent="false"
-        android:label="owrtpc_mobile"
+        android:label="OWRTPC"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher">

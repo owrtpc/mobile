@@ -95,7 +95,8 @@ revision-bound local draft, is submitted once and is confirmed only after both
 the committed snapshot and live status match. A conflict or unconfirmed outcome
 requires reopening the screen to load current state before another attempt.
 
-M3 functionality is implemented; physical Android/iOS acceptance remains open.
+M3 was explicitly accepted by the owner on 2026-09-08 and is closed. Remaining
+physical-device release checks are tracked in M4.
 See the [tracked release roadmap](https://github.com/owrtpc/core/blob/main/docs/ROADMAP.md)
 and [mobile milestones](https://github.com/owrtpc/mobile/milestones) for M3/M4
 acceptance. Source versions are not proof of public binary distribution: the
@@ -123,3 +124,19 @@ OWRTPC is independent and not affiliated with OpenWrt. OpenWrt is a registered
 trademark owned by Software Freedom Conservancy (SFC); see
 [OpenWrt](https://openwrt.org) and its [trademark policy](https://openwrt.org/trademark).
 Naming clarification remains a pre-promotion gate in the core release review.
+
+## Privacy, diagnostics and support
+
+[Privacy information](docs/PRIVACY.md) and offline connection/certificate help
+are accessible before login and from Settings. Settings also offers a diagnostics
+preview with an explicit copy action. No report is sent automatically.
+
+The report allowlists app version/build, platform, access level, API compatibility
+and known feature flags. It omits router/user/device identifiers, credentials,
+certificate fingerprints, profile data and raw errors/logs. Backend version labels
+that do not match the numeric release format are omitted. Clipboard handling is
+controlled by the operating system; review anything added to a public report.
+
+Use the [setup and recovery guide](https://github.com/owrtpc/core/blob/main/docs/MOBILE_SETUP.md)
+for HTTPS, fingerprint comparison, restricted accounts and compatibility.
+Suspected vulnerabilities belong in private security reports.

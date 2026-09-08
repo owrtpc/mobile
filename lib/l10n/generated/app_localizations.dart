@@ -1351,6 +1351,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OpenWrt is a registered trademark of Software Freedom Conservancy (SFC).'**
   String get openWrtTrademark;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyData.
+  ///
+  /// In en, this message translates to:
+  /// **'OWRTPC connects directly to the router you enter over HTTPS. The app displays profiles, device names and addresses, schedules and usage supplied by that router. There is no OWRTPC cloud account, advertising, analytics or automatic crash reporting.'**
+  String get privacyData;
+
+  /// No description provided for @privacyStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'The session stays in memory. If you enable Remember login, the router address, username and password are saved in iOS device-bound Keychain or Android encrypted storage. Appearance, language and paired certificate fingerprints with their router addresses are stored locally.'**
+  String get privacyStorage;
+
+  /// No description provided for @privacyRemoval.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out removes the remembered login and attempts to end the router session. If a storage error appears, deletion could not be confirmed. Preferences and paired certificates remain. Sign out before uninstalling: iOS Keychain items can survive removal of the app. Removing the app does not delete profiles or usage stored on the router.'**
+  String get privacyRemoval;
+
+  /// No description provided for @privacySharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics are prepared locally and copied only when you choose Copy diagnostics. They contain app/build version, platform, access level and backend compatibility, without addresses, credentials, profiles or raw logs. The system clipboard may be accessible to other apps or synced by your operating system. Opening a web link uses your browser and that site’s privacy rules; anything you post on GitHub is shared with GitHub and, for public issues, other readers.'**
+  String get privacySharing;
+
+  /// No description provided for @privacyContact.
+  ///
+  /// In en, this message translates to:
+  /// **'For questions, contact the maintainer @desmofab through the project on GitHub. Do not post credentials or personal router data in public issues. The online notice describes the same data handling and links to private security reporting.'**
+  String get privacyContact;
+
+  /// No description provided for @privacyOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the online privacy notice'**
+  String get privacyOnline;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection and support'**
+  String get supportTitle;
+
+  /// No description provided for @supportConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the router’s trusted network and allow local-network access in phone settings. Enter its HTTPS address, including the port if needed. Use a dedicated OWRTPC account. Do not expose the router’s management interface to the Internet.'**
+  String get supportConnection;
+
+  /// No description provided for @supportCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'For a self-signed certificate, compare the complete SHA-256 fingerprint with the certificate obtained through a trusted router console or verified SSH connection. After an intentional certificate renewal, sign out, reconnect and compare the replacement before pairing again. Stop if the change is unexpected. Check the phone’s date and time if a certificate has expired or is not yet valid.'**
+  String get supportCertificate;
+
+  /// No description provided for @supportRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'After a lost connection during a change, reconnect and reload the profile to check what the router saved before trying again. Do not reset the router to fix a connection error. Missing actions can mean a read-only account or an older backend; the setup guide explains compatibility and recovery.'**
+  String get supportRecovery;
+
+  /// No description provided for @supportReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'For ordinary problems, include the diagnostics preview and steps to reproduce without personal data. Review screenshots before sharing. Report suspected security flaws privately using the Security policy, not in a public issue.'**
+  String get supportReporting;
+
+  /// No description provided for @setupGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup guide'**
+  String get setupGuide;
+
+  /// No description provided for @reportProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Project issues'**
+  String get reportProblem;
+
+  /// No description provided for @securityReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Security policy'**
+  String get securityReporting;
+
+  /// No description provided for @diagnosticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get diagnosticsTitle;
+
+  /// No description provided for @diagnosticsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview technical details before copying'**
+  String get diagnosticsSummary;
+
+  /// No description provided for @diagnosticsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This report contains only app/build version, platform, access level and backend compatibility. Unknown versions appear as null. It excludes addresses, accounts, passwords, tokens, certificate fingerprints, profiles, devices and raw logs. Nothing is sent automatically. Copying places this text in the system clipboard.'**
+  String get diagnosticsExplanation;
+
+  /// No description provided for @copyDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy diagnostics'**
+  String get copyDiagnostics;
+
+  /// No description provided for @diagnosticsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics copied'**
+  String get diagnosticsCopied;
+
+  /// No description provided for @diagnosticsCopyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not copy diagnostics. Try again.'**
+  String get diagnosticsCopyError;
 }
 
 class _AppLocalizationsDelegate

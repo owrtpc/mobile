@@ -52,3 +52,27 @@ acceptance, production signing and beta distribution remain M4 work.
 
 Report suspected vulnerabilities privately using the repository Security tab;
 do not include credentials or personal router data in a public issue.
+
+## M4 privacy and support increment — 0.5.0+21
+
+M3 was accepted by the owner on 2026-09-08. Remaining physical release/security
+checks stay in M4; the milestone decision does not invent individual test results.
+
+The app now provides offline EN/IT privacy and connection/certificate guidance
+before login and in Settings, plus a public [privacy notice](PRIVACY.md) and
+[private vulnerability reporting policy](../SECURITY.md). Both repository private
+reporting forms were verified enabled on 2026-09-08.
+
+Support diagnostics use an explicit field allowlist: numeric app/build/backend
+versions, platform, access level, API compatibility and known capability booleans.
+Unknown/custom version strings and feature names are omitted. No raw errors,
+router addresses, usernames, tokens, certificate fingerprints, profiles, device
+identifiers, dates or timezone data are exported. An in-app preview precedes the
+explicit clipboard action; there is no automatic upload or new dependency.
+Clipboard errors display fixed local copy rather than raw platform details.
+
+Eight new tests cover privacy/help access before login in EN/IT at 200% text,
+diagnostics preview/copy, clipboard failure and hostile/private metadata. The
+complete shared checks pass locally: localization, formatting, analyzer and 127
+Flutter tests. Native device/clipboard behavior, store declarations and final
+pre-publication scans remain release gates.

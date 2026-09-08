@@ -761,4 +761,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get openWrtTrademark =>
       'OpenWrt is a registered trademark of Software Freedom Conservancy (SFC).';
+
+  @override
+  String get privacyTitle => 'Privacy';
+
+  @override
+  String get privacyData =>
+      'OWRTPC connects directly to the router you enter over HTTPS. The app displays profiles, device names and addresses, schedules and usage supplied by that router. There is no OWRTPC cloud account, advertising, analytics or automatic crash reporting.';
+
+  @override
+  String get privacyStorage =>
+      'The session stays in memory. If you enable Remember login, the router address, username and password are saved in iOS device-bound Keychain or Android encrypted storage. Appearance, language and paired certificate fingerprints with their router addresses are stored locally.';
+
+  @override
+  String get privacyRemoval =>
+      'Sign out removes the remembered login and attempts to end the router session. If a storage error appears, deletion could not be confirmed. Preferences and paired certificates remain. Sign out before uninstalling: iOS Keychain items can survive removal of the app. Removing the app does not delete profiles or usage stored on the router.';
+
+  @override
+  String get privacySharing =>
+      'Diagnostics are prepared locally and copied only when you choose Copy diagnostics. They contain app/build version, platform, access level and backend compatibility, without addresses, credentials, profiles or raw logs. The system clipboard may be accessible to other apps or synced by your operating system. Opening a web link uses your browser and that site’s privacy rules; anything you post on GitHub is shared with GitHub and, for public issues, other readers.';
+
+  @override
+  String get privacyContact =>
+      'For questions, contact the maintainer @desmofab through the project on GitHub. Do not post credentials or personal router data in public issues. The online notice describes the same data handling and links to private security reporting.';
+
+  @override
+  String get privacyOnline => 'Read the online privacy notice';
+
+  @override
+  String get supportTitle => 'Connection and support';
+
+  @override
+  String get supportConnection =>
+      'Connect to the router’s trusted network and allow local-network access in phone settings. Enter its HTTPS address, including the port if needed. Use a dedicated OWRTPC account. Do not expose the router’s management interface to the Internet.';
+
+  @override
+  String get supportCertificate =>
+      'For a self-signed certificate, compare the complete SHA-256 fingerprint with the certificate obtained through a trusted router console or verified SSH connection. After an intentional certificate renewal, sign out, reconnect and compare the replacement before pairing again. Stop if the change is unexpected. Check the phone’s date and time if a certificate has expired or is not yet valid.';
+
+  @override
+  String get supportRecovery =>
+      'After a lost connection during a change, reconnect and reload the profile to check what the router saved before trying again. Do not reset the router to fix a connection error. Missing actions can mean a read-only account or an older backend; the setup guide explains compatibility and recovery.';
+
+  @override
+  String get supportReporting =>
+      'For ordinary problems, include the diagnostics preview and steps to reproduce without personal data. Review screenshots before sharing. Report suspected security flaws privately using the Security policy, not in a public issue.';
+
+  @override
+  String get setupGuide => 'Setup guide';
+
+  @override
+  String get reportProblem => 'Project issues';
+
+  @override
+  String get securityReporting => 'Security policy';
+
+  @override
+  String get diagnosticsTitle => 'Diagnostics';
+
+  @override
+  String get diagnosticsSummary => 'Preview technical details before copying';
+
+  @override
+  String get diagnosticsExplanation =>
+      'This report contains only app/build version, platform, access level and backend compatibility. Unknown versions appear as null. It excludes addresses, accounts, passwords, tokens, certificate fingerprints, profiles, devices and raw logs. Nothing is sent automatically. Copying places this text in the system clipboard.';
+
+  @override
+  String get copyDiagnostics => 'Copy diagnostics';
+
+  @override
+  String get diagnosticsCopied => 'Diagnostics copied';
+
+  @override
+  String get diagnosticsCopyError => 'Could not copy diagnostics. Try again.';
 }

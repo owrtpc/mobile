@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/security/certificate_trust.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../settings/presentation/support_information.dart';
 import '../domain/connection_failure.dart';
 import 'connection_controller.dart';
 
@@ -210,6 +211,22 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                               ? strings.connectingAction
                               : strings.connectAction,
                         ),
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        children: [
+                          TextButton(
+                            key: const Key('privacy-action'),
+                            onPressed: () => showPrivacyInformation(context),
+                            child: Text(strings.privacyTitle),
+                          ),
+                          TextButton(
+                            key: const Key('support-action'),
+                            onPressed: () => showConnectionHelp(context),
+                            child: Text(strings.supportTitle),
+                          ),
+                        ],
                       ),
                     ],
                   ),

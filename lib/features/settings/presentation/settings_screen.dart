@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app_preferences.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../connection/domain/connected_router.dart';
+import '../domain/support_diagnostics.dart';
+import 'support_information.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -126,9 +130,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 ListTile(
+                  key: const Key('privacy-action'),
                   leading: const Icon(Icons.info_outline_rounded),
-                  title: Text(strings.about),
+                  title: Text(strings.privacyTitle),
                   subtitle: Text(strings.privacySummary),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showPrivacyInformation(context),
                 ),
                 const Divider(height: 1),
                 FutureBuilder<PackageInfo>(
@@ -145,6 +152,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: Text(value),
                     );
                   },
+                ),
+                ListTile(
+                  key: const Key('support-action'),
+                  leading: const Icon(Icons.help_outline_rounded),
+                  title: Text(strings.supportTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showConnectionHelp(context),
+                ),
+                FutureBuilder<PackageInfo>(
+                  future: _packageInfo,
+                  builder: (context, snapshot) => ListTile(
+                    key: const Key('diagnostics-action'),
+                    leading: const Icon(Icons.description_outlined),
+                    title: Text(strings.diagnosticsTitle),
+                    subtitle: Text(strings.diagnosticsSummary),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showDiagnostics(snapshot.data),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -218,6 +243,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context).openLinkError)),
+    );
+  }
+
+  void _showDiagnostics(PackageInfo? packageInfo) {
+    final strings = AppLocalizations.of(context);
+    final report = supportDiagnostics(
+      router: widget.router,
+      packageInfo: packageInfo,
+      platform: defaultTargetPlatform,
+    );
+    showSupportSheet(
+      context,
+      title: strings.diagnosticsTitle,
+      children: [
+        Text(strings.diagnosticsExplanation),
+        const SizedBox(height: 16),
+        SelectableText(
+          report,
+          key: const Key('diagnostics-preview'),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(fontFamily: 'monospace'),
+        ),
+        const SizedBox(height: 16),
+        _CopyDiagnosticsButton(report: report),
+      ],
     );
   }
 
@@ -344,4 +394,59 @@ class _CyclePreferenceTile extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _CopyDiagnosticsButton extends StatefulWidget {
+  const _CopyDiagnosticsButton({required this.report});
+
+  final String report;
+
+  @override
+  State<_CopyDiagnosticsButton> createState() => _CopyDiagnosticsButtonState();
+}
+
+class _CopyDiagnosticsButtonState extends State<_CopyDiagnosticsButton> {
+  bool _copying = false;
+  bool? _copied;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton.icon(
+          key: const Key('copy-diagnostics-action'),
+          onPressed: _copying ? null : _copy,
+          icon: const Icon(Icons.copy_outlined),
+          label: Text(strings.copyDiagnostics),
+        ),
+        if (_copied != null)
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              _copied!
+                  ? strings.diagnosticsCopied
+                  : strings.diagnosticsCopyError,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _copy() async {
+    setState(() => _copying = true);
+    var copied = false;
+    try {
+      await Clipboard.setData(ClipboardData(text: widget.report));
+      copied = true;
+    } catch (_) {
+      // Never display raw platform errors or include them in the report.
+    }
+    if (!mounted) return;
+    setState(() {
+      _copying = false;
+      _copied = copied;
+    });
+  }
 }
