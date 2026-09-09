@@ -449,7 +449,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get welcomeBody =>
-      'OWRTPC si connette tramite la rete locale. Non usa account cloud o servizi di inoltro remoto.';
+      'OWRTPC si connette al router tramite la rete locale o una VPN configurata esternamente. Non serve un account cloud OWRTPC.';
 
   @override
   String get httpsNotice => 'Sono accettate soltanto connessioni HTTPS sicure.';
@@ -498,7 +498,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get connectionRouterUnreachable =>
-      'Il router non è raggiungibile su questa rete locale.';
+      'Il router non è raggiungibile. Controlla l’indirizzo e la connessione di rete o della VPN esterna.';
 
   @override
   String get connectionTimeout => 'Il router non ha risposto in tempo.';
@@ -793,7 +793,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get supportConnection =>
-      'Collegati alla rete fidata del router e consenti l’accesso alla rete locale nelle impostazioni del telefono. Inserisci l’indirizzo HTTPS e, se necessario, la porta. Usa un account dedicato a OWRTPC. Non esporre a Internet l’interfaccia di gestione del router.';
+      'Collegati alla rete fidata del router oppure attiva prima una VPN configurata esternamente. OWRTPC non configura né attiva VPN. Consenti l’accesso alla rete locale se richiesto. Inserisci l’indirizzo HTTPS raggiungibile del router, con la porta se necessaria, e usa un account dedicato a OWRTPC. Anche con una VPN serve un certificato HTTPS valido o verificato esplicitamente. Consulta la guida di configurazione per WireGuard e, se necessario, Tailscale. Non esporre a Internet l’interfaccia di gestione del router.';
 
   @override
   String get supportCertificate =>

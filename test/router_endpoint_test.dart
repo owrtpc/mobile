@@ -19,6 +19,24 @@ void main() {
       expect(endpoint.hasExplicitPort, isTrue);
     });
 
+    test(
+      'accepts externally routed addresses without a LAN-only allowlist',
+      () {
+        for (final address in [
+          '10.8.0.1',
+          '100.101.102.103',
+          '[fd7a:115c:a1e0::1]',
+          'router.example.ts.net',
+        ]) {
+          final endpoint = RouterEndpoint.parse('$address:8443');
+
+          expect(endpoint.uri, Uri.parse('https://$address:8443/ubus'));
+          expect(endpoint.displayAddress, '$address:8443');
+          expect(endpoint.hasExplicitPort, isTrue);
+        }
+      },
+    );
+
     test('rejects plaintext HTTP', () {
       expect(
         () => RouterEndpoint.parse('http://openwrt.lan'),

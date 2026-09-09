@@ -1,8 +1,9 @@
 # OWRTPC Mobile
 
 Flutter companion app for OWRTPC. The router remains the source of truth and
-the app connects directly over the local network without an OWRTPC cloud
-account.
+the app connects over HTTPS on the local network or through an externally
+configured VPN, without an OWRTPC cloud account. VPN implementation and setup
+are outside the project scope; the app uses the phone's existing network route.
 
 ## Docker-first development
 
@@ -139,4 +140,10 @@ controlled by the operating system; review anything added to a public report.
 
 Use the [setup and recovery guide](https://github.com/owrtpc/core/blob/main/docs/MOBILE_SETUP.md)
 for HTTPS, fingerprint comparison, restricted accounts and compatibility.
+For access outside home, see the
+[external VPN guide](docs/VPN.md):
+WireGuard first, with Tailscale as an optional alternative. The user or network
+administrator provides the working tunnel; OWRTPC does not install, configure,
+detect or activate a VPN. No VPN SDK or native VPN integration is required by
+this scope. Physical iOS/Android VPN checks remain pending until recorded.
 Suspected vulnerabilities belong in private security reports.
